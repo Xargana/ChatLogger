@@ -1,0 +1,16 @@
+{
+  "name": "minecraft_bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "minecraft-data": "^3.66.0",
+    "mineflayer": "^4.20.1"
+  }
+}
