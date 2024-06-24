@@ -1,2 +1,4 @@
 # ChatLogger
-Logs the chat of a offline Minecraft server
+Logs the chat of a minecraft server
+
+Currently the code only supports offline mode
