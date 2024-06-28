@@ -16,3 +16,6 @@ Currently the code only supports offline mode
 3.Open in terminal
 
 4.Run "node ./ChatLogger.js
+
+
+Type "!help" for list of commands
