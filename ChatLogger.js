@@ -56,31 +56,31 @@ function simulateClick(bot) {
 
 // Function to move the bot
 function moveBot(bot, distance, direction) {
+    const currentPos = bot.entity.position.clone(); // Get current position as a clone
     const yaw = bot.entity.yaw;
-    let movementVec;
 
+    let movementVec;
     switch (direction) {
         case 'forward':
         case 'fw':
-            movementVec = new Vec3(-Math.sin(yaw) * distance, 0, Math.cos(yaw) * distance);
+            movementVec = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw)).scale(distance);
             break;
         case 'back':
         case 'bk':
-            movementVec = new Vec3(Math.sin(yaw) * distance, 0, -Math.cos(yaw) * distance);
+            movementVec = new Vec3(Math.sin(yaw), 0, -Math.cos(yaw)).scale(distance);
             break;
         case 'left':
         case 'l':
-            movementVec = new Vec3(Math.cos(yaw) * distance, 0, Math.sin(yaw) * distance);
+            movementVec = new Vec3(Math.cos(yaw), 0, Math.sin(yaw)).scale(distance);
             break;
         case 'right':
         case 'r':
-            movementVec = new Vec3(-Math.cos(yaw) * distance, 0, -Math.sin(yaw) * distance);
+            movementVec = new Vec3(-Math.cos(yaw), 0, -Math.sin(yaw)).scale(distance);
             break;
         default:
             throw new Error(`Unknown direction: ${direction}`);
     }
 
-    const currentPos = bot.entity.position;
     const targetPos = currentPos.plus(movementVec);
 
     bot.physics.onGround = true; // Ensure the bot is on the ground to move
@@ -139,7 +139,7 @@ function startBot(config) {
     setInterval(() => {
         const serverStatus = bot.players ? `${Object.keys(bot.players).length} players online` : 'No players online';
         log(`Server Status - ${serverStatus}`);
-    }, 25000);  // 25000 milliseconds = 25 seconds
+    }, 30000);  // 25000 milliseconds = 25 seconds
 
     // Log chat messages and filter keywords
     bot.on('message', async (message) => {
@@ -204,7 +204,7 @@ function startBot(config) {
     // Periodically simulate a click action to prevent inactivity kick
     setInterval(() => {
         simulateClick(bot);
-    }, 60 * 1000); // Click every 60 seconds
+    }, 5 * 60 * 1000); // Click every 60 seconds
 
     // Handle console input
     process.stdin.on('data', (data) => {
@@ -212,7 +212,7 @@ function startBot(config) {
         const [command, ...args] = input.split(' ');
 
         if (command.startsWith('!')) {
-            const mainCommand = command.substring(1).replace('fw', 'forward').replace('bk', 'back').replace('l', 'left').replace('r', 'right');
+            const mainCommand = command.substring(1);
             if (mainCommand === 'forward' || mainCommand === 'back' || mainCommand === 'left' || mainCommand === 'right') {
                 const direction = mainCommand;
                 const distance = parseFloat(args[0]);
@@ -221,7 +221,7 @@ function startBot(config) {
                 } else {
                     console.log(`Invalid distance for ${command} command.`);
                 }
-            } else if (command === '!tps') {
+            } else if (mainCommand === 'tps') {
                 sendCommand(bot, '/tps')
                     .then(tps => {
                         bot.chat(`Current TPS: ${tps}`);
@@ -230,8 +230,14 @@ function startBot(config) {
                     .catch(err => {
                         log(`Error while fetching TPS: ${err.message}`);
                     });
-            } else if (command === '!help') {
-                console.log('Available commands:\n!forward <distance>\n!back <distance>\n!left <distance>\n!right <distance>\n!tps\n!help');
+            } else if (mainCommand === 'list') {
+                const onlinePlayers = Object.keys(bot.players).join(', ');
+                console.log(`Online players: ${onlinePlayers}`);
+                log(`Listed online players: ${onlinePlayers}`);
+            } else if (mainCommand === 'stop') {
+                stopBotMovement(bot);
+            } else if (mainCommand === 'help') {
+                console.log('Available commands:\n!forward <distance>\n!back <distance>\n!left <distance>\n!right <distance>\n!tps\n!list\n!stop\n!help');
             } else {
                 console.log('Command not found. Type !help for the list of available commands.');
             }
@@ -240,6 +246,13 @@ function startBot(config) {
             log(`Console message sent to server: ${input}`);
         }
     });
+
+    // Function to stop bot movement
+    function stopBotMovement(bot) {
+        // Clear all movement control states
+        bot.clearControlStates();
+        console.log('Bot movement stopped.');
+    }
 
     // Gracefully close log streams on process exit
     process.on('exit', () => {
