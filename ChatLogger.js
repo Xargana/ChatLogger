@@ -1,271 +1,317 @@
-const fs = require('fs');
-const path = require('path');
 const mineflayer = require('mineflayer');
-const Vec3 = require('vec3'); // Import vec3 module for vector operations
+const fs = require('fs');
+const readline = require('readline');
+const path = require('path');
+const chalk = require('chalk');
 
-// Read configuration from config.txt
-function readConfig() {
-    try {
-        const configPath = path.join(__dirname, 'config.txt');
-        const configData = fs.readFileSync(configPath, 'utf8');
-        const configLines = configData.split('\n');
+// Create an interface for reading input from the console
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-        let config = {};
-        configLines.forEach(line => {
-            const parts = line.split(':');
-            if (parts.length === 2) {
-                const key = parts[0].trim();
-                const value = parts[1].trim();
-                config[key] = value;
-            }
+// Helper function to ask questions
+const askQuestion = (query) => {
+  return new Promise((resolve) => rl.question(query, resolve));
+};
+
+// Helper function to format the current time
+const getCurrentTime = () => {
+  const now = new Date();
+  return now.toTimeString().split(' ')[0]; // Returns HH:MM:SS
+};
+
+// Function to read and parse the config file
+const readConfigFile = (filePath) => {
+  const config = {};
+  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  const lines = fileContent.split('\n');
+
+  for (const line of lines) {
+    if (line.trim() === '' || line.startsWith('#')) continue; // Skip empty or commented lines
+
+    const [key, value] = line.split(':').map((part) => part.trim());
+    config[key] = value;
+  }
+
+  return config;
+};
+
+// Function to get bot settings from user input
+const getBotSettingsFromUser = async () => {
+  const serverIP = await askQuestion('Enter server IP: ');
+  const serverPort = (await askQuestion('Enter server port (25565 if left empty): ')) || '25565';
+  const version = await askQuestion('Enter Minecraft version (leave empty for latest): ');
+
+  const useLoginInput = await askQuestion('Use login? (y/n): ');
+  const useLogin = useLoginInput.toLowerCase() === 'y';
+
+  let username = '';
+  let password = '';
+  if (useLogin) {
+    username = await askQuestion('Enter username: ');
+    password = await askQuestion('Enter password: ');
+  }
+
+  const botCount = parseInt(await askQuestion('Enter number of bots: '), 10);
+  const useRepetitiveNamesInput = await askQuestion('Use repetitive names? (y/n): ');
+
+  const useRepetitiveNames = useRepetitiveNamesInput.toLowerCase() === 'y';
+
+  const usernames = [];
+  
+  // Repetitive naming enforced if botCount > 1
+  if (botCount > 1) {
+    const baseUsername = await askQuestion('Enter base username for bots: ');
+    for (let i = 1; i <= botCount; i++) {
+      usernames.push(`${baseUsername}${i}`);
+    }
+  } else {
+    usernames.push(await askQuestion('Enter username for the bot: '));
+  }
+
+  const useFilteringInput = await askQuestion('Enable chat filtering? (y/n): ');
+  const useFiltering = useFilteringInput.toLowerCase() === 'y';
+
+  let whitelistedWords = [];
+  if (useFiltering) {
+    const whitelistedWordsInput = await askQuestion('Enter whitelisted words (comma-separated): ');
+    whitelistedWords = whitelistedWordsInput.split(',').map(word => word.trim());
+  }
+
+  const trustedUsersInput = await askQuestion('Enter trusted users (comma-separated): ');
+  const trustedUsers = trustedUsersInput.split(',').map(user => user.trim());
+
+  return {
+    serverIP,
+    serverPort,
+    version,
+    useLogin,
+    username,
+    password,
+    botCount,
+    useRepetitiveNames,
+    usernames,
+    useFiltering,
+    whitelistedWords,
+    trustedUsers,
+  };
+};
+
+// Main bot function
+const runBot = async () => {
+  console.clear();
+
+  // Ask for config file name
+  const configFileName = await askQuestion('Enter config file name (leave empty for manual input): ');
+
+  let config;
+  let usernames = []; // Initialize usernames array
+
+  if (configFileName) {
+    const configPath = path.join(__dirname, 'configs', configFileName);
+    if (fs.existsSync(configPath)) {
+      config = readConfigFile(configPath);
+
+      // Parse config data properly and set defaults
+      const serverIP = config.serverIP || 'localhost'; // Default to 'localhost' if not specified
+      const serverPort = config.serverPort || '25565'; // Default port
+      const version = config.version || undefined; // Leave undefined for the latest version
+      const botCount = parseInt(config.bot_amount, 10) || 1; // Default to 1 bot
+      const useLogin = config.useLogin === 'true'; // Convert to boolean
+
+      // Check if repetitive naming is enabled
+      if (botCount > 1) {
+        const baseUsername = config.username || 'Bot';
+        for (let i = 1; i <= botCount; i++) {
+          usernames.push(`${baseUsername}${i}`);
+        }
+      } else {
+        usernames.push(config.username || 'Bot'); // For a single bot, use the specified username
+      }
+
+      // Other config values
+      config = {
+        ...config, // Preserve other settings
+        serverIP,
+        serverPort,
+        version,
+        botCount,
+        usernames,
+        useLogin,
+        trustedUsers: (config.trustedUsers || '').split(',').map(user => user.trim()),
+        whitelistedWords: (config.whitelistedWords || '').split(',').map(word => word.trim()),
+        useFiltering: config.useFiltering === 'true', // Convert to boolean
+      };
+
+    } else {
+      console.log(chalk.red(`Config file "${configFileName}" not found in /configs folder.`));
+      return;
+    }
+  } else {
+    // Use the old manual method if no config file is provided
+    config = await getBotSettingsFromUser();
+    usernames = config.usernames;
+  }
+
+  rl.close(); // Close the input stream once inputs are gathered
+
+  const {
+    serverIP,
+    serverPort,
+    version,
+    useLogin,
+    password,
+    useFiltering,
+    whitelistedWords,
+    trustedUsers,
+  } = config;
+
+  // Debugging output
+  console.log(`Connecting to server IP: ${serverIP}, Port: ${serverPort}`);
+
+  // Create log directories based on server IP and current date-time
+  const dateTime = new Date().toISOString().replace(/[:.]/g, '-'); // Format datetime for folder names
+  const logDir = path.join(__dirname, 'logs', `${serverIP}_${dateTime}`);
+  fs.mkdirSync(logDir, { recursive: true });
+
+  // Create bots and set up chat logging
+  const bots = [];
+  const logStream = fs.createWriteStream(path.join(logDir, 'chat.txt'), { flags: 'a' });
+  const filteredStream = useFiltering ? fs.createWriteStream(path.join(logDir, 'filtered.txt'), { flags: 'a' }) : null;
+
+  // Delay function
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  let firstBotLogged = false; // Flag to track if the first bot has logged messages
+
+  for (const botUsername of usernames) {
+    await delay(5000); // 5-second delay before each bot login attempt
+
+    const bot = mineflayer.createBot({
+      host: serverIP,
+      port: serverPort,
+      username: botUsername,
+      password: useLogin ? password : undefined,
+      version: version || undefined, // Add version parameter
+    });
+
+    bots.push(bot);
+
+    // Handle successful login
+    bot.on('spawn', () => {
+      if (!firstBotLogged) {
+        firstBotLogged = true; // Set the flag to true when the first bot spawns
+
+        // Log messages for the first bot only
+        bot.on('chat', (username, message) => {
+          const timestamp = getCurrentTime(); // Get the current time
+          logStream.write(`[${timestamp}] ${username}: ${message}\n`); // Write log with timestamp
+          console.log(`[${timestamp}] ${username}: ${message}`); // Display the chat message in the console
+
+          // Log filtered messages
+          if (useFiltering && whitelistedWords.some(word => message.includes(word))) {
+            filteredStream.write(`[${timestamp}] ${username}: ${message}\n`); // Write filtered log with timestamp
+          }
         });
 
-        return config;
-    } catch (err) {
-        console.error(`Error reading config file: ${err}`);
-        return null;
-    }
-}
+        console.log(chalk.green(`[${botUsername}] is logging`));
+      }
 
-// Function to send a command and handle the response
-function sendCommand(bot, command) {
-    return new Promise((resolve, reject) => {
-        bot.chat(command);
-        const listener = (message) => {
-            const rawMessage = message.toString().trim();
-            if (rawMessage.startsWith('TPS:')) {
-                bot.removeListener('message', listener); // Remove listener once TPS response is received
-                const tps = rawMessage.split(':')[1].trim();
-                resolve(tps);
-            }
-        };
-        bot.on('message', listener);
-
-        // Timeout to handle if no response is received within a reasonable time
-        setTimeout(() => {
-            bot.removeListener('message', listener);
-            reject(new Error('Timeout while waiting for response'));
-        }, 5000); // 5 seconds timeout
-    });
-}
-
-// Function to simulate a click action (send a chat message)
-function simulateClick(bot) {
-    bot.chat('/spawn'); // Replace with an actual command recognized by your server
-}
-
-// Function to move the bot
-function moveBot(bot, distance, direction) {
-    const currentPos = bot.entity.position.clone(); // Get current position as a clone
-    const yaw = bot.entity.yaw;
-
-    let movementVec;
-    switch (direction) {
-        case 'forward':
-        case 'fw':
-            movementVec = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw)).scale(distance);
-            break;
-        case 'back':
-        case 'bk':
-            movementVec = new Vec3(Math.sin(yaw), 0, -Math.cos(yaw)).scale(distance);
-            break;
-        case 'left':
-        case 'l':
-            movementVec = new Vec3(Math.cos(yaw), 0, Math.sin(yaw)).scale(distance);
-            break;
-        case 'right':
-        case 'r':
-            movementVec = new Vec3(-Math.cos(yaw), 0, -Math.sin(yaw)).scale(distance);
-            break;
-        default:
-            throw new Error(`Unknown direction: ${direction}`);
-    }
-
-    const targetPos = currentPos.plus(movementVec);
-
-    bot.physics.onGround = true; // Ensure the bot is on the ground to move
-
-    // Set the bot's control state to move in the specified direction
-    bot.setControlState(direction.includes('forward') ? 'forward' : direction.includes('back') ? 'back' : direction.includes('left') ? 'left' : 'right', true);
-
-    // Stop the bot's movement after it has moved the desired distance
-    const interval = setInterval(() => {
-        const distanceMoved = bot.entity.position.distanceTo(currentPos);
-        if (distanceMoved >= distance) {
-            bot.setControlState(direction.includes('forward') ? 'forward' : direction.includes('back') ? 'back' : direction.includes('left') ? 'left' : 'right', false);
-            clearInterval(interval);
-            console.log(`Bot has moved ${direction} by ${distance} blocks.`);
+      // Listen for commands from trusted users in chat
+      bot.on('chat', (username, message) => {
+        if (message.startsWith('!!') && trustedUsers.includes(username)) {
+          const command = message.slice(2).trim();
+          handleCommand(bot, command);
         }
-    }, 50); // Check every 50 milliseconds
-}
-
-// Main bot logic
-function startBot(config) {
-    // Configuration variables
-    const serverAddress = config['Server Address'];
-    const serverPort = parseInt(config['Server Port']);
-    const botUsername = config['Bot Username'];
-    const registerPassword = config['Register Password'];
-    const loginPassword = config['Login Password'];
-    const keywordsToMonitor = config['Keywords to Monitor'].split(',').map(keyword => keyword.trim());
-
-    // Create write streams for logging
-    const logFilePath = path.join(__dirname, 'log.txt');
-    const keywordLogFilePath = path.join(__dirname, 'log2.txt');
-    const logStream = fs.createWriteStream(logFilePath, { flags: 'a' }); // 'a' means append
-    const keywordLogStream = fs.createWriteStream(keywordLogFilePath, { flags: 'a' }); // 'a' means append
-
-    // Function to log messages to console and log.txt
-    function log(message) {
-        const logEntry = `[${new Date().toLocaleString()}] ${message}`;
-        console.log(logEntry);
-        logStream.write(logEntry + '\n');
-    }
-
-    // Function to log messages containing specific keywords to log2.txt
-    function logKeyword(message) {
-        const logEntry = `[${new Date().toLocaleString()}] ${message}`;
-        keywordLogStream.write(logEntry + '\n');
-    }
-
-    // Create a bot instance
-    const bot = mineflayer.createBot({
-        host: serverAddress,
-        port: serverPort,
-        username: botUsername,
+      });
     });
 
-    // Log server status and uptime every 25 seconds
-    setInterval(() => {
-        const serverStatus = bot.players ? `${Object.keys(bot.players).length} players online` : 'No players online';
-        log(`Server Status - ${serverStatus}`);
-    }, 30000);  // 25000 milliseconds = 25 seconds
-
-    // Log chat messages and filter keywords
-    bot.on('message', async (message) => {
-        const rawMessage = message.toString();
-        log(`${rawMessage}`);
-
-        // Check for specific keywords
-        const lowerCaseMessage = rawMessage.toLowerCase();
-        const foundKeywords = keywordsToMonitor.filter(keyword => lowerCaseMessage.includes(keyword));
-
-        if (foundKeywords.length > 0) {
-            foundKeywords.forEach(keyword => {
-                logKeyword(`Keyword message - ${rawMessage}`);
-            });
-        }
-    });
-
-    // Log errors
     bot.on('error', (err) => {
-        log(`Bot encountered an error: ${err}`);
+      console.error(`[${botUsername}] Error:`, err);
     });
 
-    // Log login status
-    bot.on('login', () => {
-        log('Bot has logged in.');
-    });
-
-    // Handle bot initialization
-    bot.once('spawn', () => {
-        log('Bot spawned and ready to connect.');
-
-        // Send the registration command after a brief delay
-        setTimeout(() => {
-            log('Sending /register command...');
-            bot.chat(`/register ${registerPassword} ${registerPassword}`);
-
-            // Send the login command after an additional 5-second delay
-            setTimeout(() => {
-                log('Sending /login command...');
-                bot.chat(`/login ${loginPassword}`);
-
-                // Move the bot forward by 1.5 blocks after 2 seconds
-                setTimeout(() => {
-                    moveBot(bot, 1.5, 'forward');
-
-                    // Start the 15-minute cycle of moving forward and backward
-                    let movingForward = false;
-                    setInterval(() => {
-                        moveBot(bot, 1.5, movingForward ? 'forward' : 'back');
-                        movingForward = !movingForward; // Toggle the direction for the next move
-                    }, 15 * 60 * 1000); // Repeat every 15 minutes
-                }, 2000); // 2000 milliseconds = 2 seconds delay before moving forward
-            }, 5000); // 5000 milliseconds = 5 seconds delay after registration command
-        }, 3000); // 3000 milliseconds = 3 seconds delay before sending the registration command
-    });
-
-    // Handle disconnection
     bot.on('end', () => {
-        log('Bot disconnected from the server.');
+      console.log(chalk.red(`[${botUsername}] Disconnected from the server.`));
     });
+  }
 
-    // Periodically simulate a click action to prevent inactivity kick
-    setInterval(() => {
-        simulateClick(bot);
-    }, 5 * 60 * 1000); // Click every 60 seconds
+  // Handle console input for commands
+  const consoleRl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-    // Handle console input
-    process.stdin.on('data', (data) => {
-        const input = data.toString().trim();
-        const [command, ...args] = input.split(' ');
-
-        if (command.startsWith('!')) {
-            const mainCommand = command.substring(1);
-            if (mainCommand === 'forward' || mainCommand === 'back' || mainCommand === 'left' || mainCommand === 'right') {
-                const direction = mainCommand;
-                const distance = parseFloat(args[0]);
-                if (!isNaN(distance)) {
-                    moveBot(bot, distance, direction);
-                } else {
-                    console.log(`Invalid distance for ${command} command.`);
-                }
-            } else if (mainCommand === 'tps') {
-                sendCommand(bot, '/tps')
-                    .then(tps => {
-                        bot.chat(`Current TPS: ${tps}`);
-                        log(`Sent TPS to chat: ${tps}`);
-                    })
-                    .catch(err => {
-                        log(`Error while fetching TPS: ${err.message}`);
-                    });
-            } else if (mainCommand === 'list') {
-                const onlinePlayers = Object.keys(bot.players).join(', ');
-                console.log(`Online players: ${onlinePlayers}`);
-                log(`Listed online players: ${onlinePlayers}`);
-            } else if (mainCommand === 'stop') {
-                stopBotMovement(bot);
-            } else if (mainCommand === 'help') {
-                console.log('Available commands:\n!forward <distance>\n!back <distance>\n!left <distance>\n!right <distance>\n!tps\n!list\n!stop\n!help');
-            } else {
-                console.log('Command not found. Type !help for the list of available commands.');
-            }
-        } else {
-            bot.chat(input);
-            log(`Console message sent to server: ${input}`);
-        }
-    });
-
-    // Function to stop bot movement
-    function stopBotMovement(bot) {
-        // Clear all movement control states
-        bot.clearControlStates();
-        console.log('Bot movement stopped.');
+  consoleRl.on('line', (input) => {
+    const [command, ...args] = input.trim().split(' ');
+    if (firstBotLogged) {
+      const bot = bots[0]; // Use the first bot for commands
+      handleCommand(bot, `${command} ${args.join(' ')}`); // Pass console command to the command handler
     }
+  });
+};
 
-    // Gracefully close log streams on process exit
-    process.on('exit', () => {
-        logStream.end();
-        keywordLogStream.end();
-    });
-}
+// Function to handle commands
+const handleCommand = (bot, command) => {
+  const args = command.split(' ');
+  const cmd = args[0];
 
-// Read configuration from config.txt
-const config = readConfig();
+  // Movement commands
+  switch (cmd) {
+    case 'f':
+      const forwardCount = parseInt(args[1], 10);
+      bot.setControlState('forward', true);
+      setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
+      break;
 
-if (config) {
-    startBot(config);
-} else {
-    console.error('Configuration could not be loaded. Check your config.txt file.');
-}
+    case 'b':
+      const backCount = parseInt(args[1], 10);
+      bot.setControlState('back', true);
+      setTimeout(() => bot.setControlState('back', false), backCount * 1000);
+      break;
+
+    case 'l':
+      const leftCount = parseInt(args[1], 10);
+      bot.setControlState('left', true);
+      setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
+      break;
+
+    case 'r':
+      const rightCount = parseInt(args[1], 10);
+      bot.setControlState('right', true);
+      setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
+      break;
+
+    case 'bot':
+      if (args[1] && args[2] && args[3]) {
+        const newBotUsername = args[1];
+        const newServerIP = args[2];
+        const newServerPort = args[3];
+
+        // Create a new bot instance with a 2-second delay
+        delay(2000).then(() => {
+          const newBot = mineflayer.createBot({
+            host: newServerIP,
+            port: newServerPort,
+            username: newBotUsername,
+          });
+
+          // Handle chat for new bot
+          newBot.on('chat', (username, message) => {
+            console.log(`[${newBotUsername}] ${username}: ${message}\n`);
+          });
+
+          console.log(`New bot created: ${newBotUsername}`);
+        });
+      } else {
+        bot.chat('Please provide a username, server IP, and port.');
+      }
+      break;
+
+    default:
+      bot.chat('Unknown command.');
+  }
+};
+
+// Start the bot
+runBot().catch(console.error);
