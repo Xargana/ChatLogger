@@ -1,5 +1,5 @@
 <h1 align="center">ChatLogger</h1>
-<p align="center">A Minecraft utility bot</p>
+<p align="center">A Minecraft utility bot for cracked servers</p>
 <div align="center">
     <img src="https://img.shields.io/github/last-commit/Xargana/ChatLogger" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/commit-activity/w/Xargana/CHatLogger" alt="GitHub commit activity"/>
