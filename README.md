@@ -9,5 +9,7 @@
     <a href="https://discord.gg/dajdVRhU5Q"><img src="https://img.shields.io/discord/1293261763902570667?logo=discord" alt="Discord"/></a>
 </div>
 
-<h2 align="center">Upcoming features</h2>
-Web UI
+<h2 align="left">Upcoming features</h2>
+<ul>
+    <li>Web UI</li> 
+</ul>
