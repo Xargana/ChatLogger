@@ -9,6 +9,23 @@
     <a href="https://discord.gg/dajdVRhU5Q"><img src="https://img.shields.io/discord/1293261763902570667?logo=discord" alt="Discord"/></a>
 </div>
 
+<h2 align="left">Installation</h2>
+ <ul>
+    <li>Download the zip file from the latest release</li> 
+    <li>Unzip the zip file and run start.bat</li>
+</ul>
+
+<h2 align="left">Dependencies</h2>
+<ul>
+    <li>mineflayer</li>
+    <li>fs</li>
+    <li>readline</li>
+    <li>chalk</li>
+    <li>express</li>
+    <li>http</li>
+    <li>Socket.io</li>
+</ul>
+
 <h2 align="left">Upcoming features</h2>
 <ul>
     <li>Pathfinding</li> 
