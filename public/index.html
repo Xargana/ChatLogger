@@ -86,63 +86,152 @@
 
   <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
+<script>
+  // Initialize Socket.IO connection
+  const socket = io();
 
-    const commandInput = document.getElementById('command-input');
-    const sendButton = document.getElementById('send-button');
-    const logsDiv = document.getElementById('logs');
+  // DOM Elements
+  const commandInput = document.getElementById('command-input');
+  const sendButton = document.getElementById('send-button');
+  const logsDiv = document.getElementById('logs');
 
-    // Send command to server
-    sendButton.addEventListener('click', () => {
-      const command = commandInput.value.trim();
-      if (command) {
-        socket.emit('command', command);
-        appendLog(`> ${command}`, 'status');
-        commandInput.value = '';
-      }
-    });
+  // Event Listeners
+  sendButton.addEventListener('click', handleSendCommand);
+  commandInput.addEventListener('keyup', handleEnterKey);
 
-    // Listen for chat messages
-    socket.on('chat', (data) => {
-      appendLog(`[${data.bot}] ${data.username}: ${data.message}`, 'chat');
-    });
+  // Socket Event Listeners
+  socket.on('chat', handleChatMessage);
+  socket.on('filtered', handleFilteredMessage);
+  socket.on('status', handleStatusMessage);
+  socket.on('error', handleErrorMessage);
+  socket.on('command-executed', handleCommandExecuted);
 
-    // Listen for filtered messages
-    socket.on('filtered', (data) => {
-      appendLog(`[${data.bot}] ${data.username}: ${data.message}`, 'filtered');
-    });
-
-    // Listen for status updates
-    socket.on('status', (message) => {
-      appendLog(message, 'status');
-    });
-
-    // Listen for errors
-    socket.on('error', (message) => {
-      appendLog(message, 'error');
-    });
-
-    // Listen for command execution confirmation
-    socket.on('command-executed', (data) => {
-      appendLog(`Command executed on [${data.bot}]: ${data.command}`, 'status');
-    });
-
-    function appendLog(message, type) {
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('log-message', type);
-      messageDiv.textContent = message;
-      logsDiv.appendChild(messageDiv);
-      logsDiv.scrollTop = logsDiv.scrollHeight;
+  /**
+   * Handles the send button click event to send a command.
+   */
+  function handleSendCommand() {
+    const command = commandInput.value.trim();
+    if (command) {
+      sendCommand(command);
+      logStatusCommand(`> ${command}`);
+      commandInput.value = '';
     }
+  }
 
-    // Allow sending command with Enter key
-    commandInput.addEventListener('keyup', (event) => {
-      if (event.key === 'Enter') {
-        sendButton.click();
-      }
-    });
-  </script>
+  /**
+   * Handles the Enter key press in the command input field.
+   * @param {KeyboardEvent} event
+   */
+  function handleEnterKey(event) {
+    if (event.key === 'Enter') {
+      handleSendCommand();
+    }
+  }
+
+  /**
+   * Sends a command to the server via Socket.IO.
+   * @param {string} command - The command to send.
+   */
+  function sendCommand(command) {
+    socket.emit('command', command);
+  }
+
+  /**
+   * Appends a status message to the logs.
+   * @param {string} message - The status message to log.
+   */
+  function logStatusCommand(message) {
+    appendLog(message, 'status');
+  }
+
+  /**
+   * Appends a chat message to the logs.
+   * @param {Object} data - The chat data containing username and message.
+   */
+  function logChatCommand(data) {
+    const message = `${data.username}: ${data.message}`;
+    appendLog(message, 'chat');
+  }
+
+  /**
+   * Appends a command-executed message to the logs.
+   * @param {Object} data - The data containing bot and command information.
+   */
+  function logCommandExecuted(data) {
+    const message = `Command executed on [${data.bot}]: ${data.command}`;
+    appendLog(message, 'status');
+  }
+
+  /**
+   * Appends a filtered message to the logs.
+   * @param {Object} data - The filtered data containing username and message.
+   */
+  function logFilteredMessage(data) {
+    const message = `${data.username}: ${data.message}`;
+    appendLog(message, 'filtered');
+  }
+
+  /**
+   * Appends an error message to the logs.
+   * @param {string} message - The error message to log.
+   */
+  function logErrorMessage(message) {
+    appendLog(message, 'error');
+  }
+
+  /**
+   * Generic function to append messages to the logs.
+   * @param {string} message - The message to append.
+   * @param {string} type - The type/category of the message (e.g., 'chat', 'status').
+   */
+  function appendLog(message, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('log-message', type);
+    messageDiv.textContent = message;
+    logsDiv.appendChild(messageDiv);
+    logsDiv.scrollTop = logsDiv.scrollHeight;
+  }
+
+  /**
+   * Socket.IO event handler for 'chat' messages.
+   * @param {Object} data - The chat data.
+   */
+  function handleChatMessage(data) {
+    logChatCommand(data);
+  }
+
+  /**
+   * Socket.IO event handler for 'filtered' messages.
+   * @param {Object} data - The filtered data.
+   */
+  function handleFilteredMessage(data) {
+    logFilteredMessage(data);
+  }
+
+  /**
+   * Socket.IO event handler for 'status' messages.
+   * @param {string} message - The status message.
+   */
+  function handleStatusMessage(message) {
+    logStatusCommand(message);
+  }
+
+  /**
+   * Socket.IO event handler for 'error' messages.
+   * @param {string} message - The error message.
+   */
+  function handleErrorMessage(message) {
+    logErrorMessage(message);
+  }
+
+  /**
+   * Socket.IO event handler for 'command-executed' messages.
+   * @param {Object} data - The command execution data.
+   */
+  function handleCommandExecuted(data) {
+    logCommandExecuted(data);
+  }
+</script>
   <h6>Shitty WebUI for ChatLogger</h6>
   <h6>Made By Xargana</h6>
 </body>
