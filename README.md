@@ -11,5 +11,5 @@
 
 <h2 align="left">Upcoming features</h2>
 <ul>
-    <li>Web UI</li> 
+    <li>Pathfinding</li> 
 </ul>
