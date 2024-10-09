@@ -406,9 +406,9 @@ const handleCommand = (bot, command) => {
       }
 
       // Listen for commands from trusted users in chat
-      bot.on('chat', (bot, username, message) => {
+      bot.on('chat', (username, message) => {
         if (message.startsWith(prefix) && trustedUsers.includes(username)) {
-          const command = message.slice(2).trim();
+          const command = message.slice(prefix.length).trim();
           handleCommand(bot, command);
 
           // Emit the command to the web UI
