@@ -3,6 +3,9 @@ const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
 const chalk = require('chalk');
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Create an interface for reading input from the console
 const rl = readline.createInterface({
@@ -98,6 +101,73 @@ const getBotSettingsFromUser = async () => {
   };
 };
 
+// Function to handle commands (same as before)
+const handleCommand = (bot, command) => {
+  const args = command.split(' ');
+  const cmd = args[0];
+
+  // Movement commands
+  switch (cmd) {
+    case 'f':
+      const forwardCount = parseInt(args[1], 10);
+      bot.setControlState('forward', true);
+      setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
+      break;
+
+    case 'b':
+      const backCount = parseInt(args[1], 10);
+      bot.setControlState('back', true);
+      setTimeout(() => bot.setControlState('back', false), backCount * 1000);
+      break;
+
+    case 'l':
+      const leftCount = parseInt(args[1], 10);
+      bot.setControlState('left', true);
+      setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
+      break;
+
+    case 'r':
+      const rightCount = parseInt(args[1], 10);
+      bot.setControlState('right', true);
+      setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
+      break;
+
+    case 'bot':
+      if (args[1] && args[2] && args[3]) {
+        const newBotUsername = args[1];
+        const newServerIP = args[2];
+        const newServerPort = args[3];
+
+        // Create a new bot instance with a 2-second delay
+        delay(2000).then(() => {
+          const newBot = mineflayer.createBot({
+            host: newServerIP,
+            port: newServerPort,
+            username: newBotUsername,
+          });
+
+          // Handle chat for new bot
+          newBot.on('chat', (username, message) => {
+            console.log(`[${newBotUsername}] ${username}: ${message}\n`);
+            io.emit('chat', { bot: newBotUsername, username, message });
+          });
+
+          console.log(`New bot created: ${newBotUsername}`);
+          io.emit('status', `New bot created: ${newBotUsername}`);
+        });
+      } else {
+        bot.chat('Please provide a username, server IP, and port.');
+      }
+      break;
+
+    default:
+      bot.chat('Unknown command.');
+  }
+};
+
+// Delay function
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Main bot function
 const runBot = async () => {
   console.clear();
@@ -180,10 +250,44 @@ const runBot = async () => {
   const logStream = fs.createWriteStream(path.join(logDir, 'chat.txt'), { flags: 'a' });
   const filteredStream = useFiltering ? fs.createWriteStream(path.join(logDir, 'filtered.txt'), { flags: 'a' }) : null;
 
-  // Delay function
-  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
   let firstBotLogged = false; // Flag to track if the first bot has logged messages
+
+  // Initialize Express app
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server);
+
+  // Serve static files from the 'public' directory
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  // Socket.io connection handling
+  io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    // Send initial status
+    socket.emit('status', 'Connected to server');
+
+    // Handle commands from the web UI
+    socket.on('command', (command) => {
+      console.log(`Received command from UI: ${command}`);
+      // For simplicity, send commands to the first bot
+      if (bots.length > 0) {
+        handleCommand(bots[0], command);
+      } else {
+        socket.emit('status', 'No bots available to send commands.');
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('A user disconnected');
+    });
+  });
+
+  // Start the server
+  const PORT = 3000;
+  server.listen(PORT, () => {
+    console.log(`Web UI server is running at http://localhost:${PORT}`);
+  });
 
   for (const botUsername of usernames) {
     await delay(5000); // 5-second delay before each bot login attempt
@@ -206,16 +310,23 @@ const runBot = async () => {
         // Log messages for the first bot only
         bot.on('chat', (username, message) => {
           const timestamp = getCurrentTime(); // Get the current time
-          logStream.write(`[${timestamp}] ${username}: ${message}\n`); // Write log with timestamp
+          const logMessage = `[${timestamp}] ${username}: ${message}\n`;
+          logStream.write(logMessage); // Write log with timestamp
           console.log(`[${timestamp}] ${username}: ${message}`); // Display the chat message in the console
+
+          // Emit chat message to the web UI
+          io.emit('chat', { bot: botUsername, username, message });
 
           // Log filtered messages
           if (useFiltering && whitelistedWords.some(word => message.includes(word))) {
-            filteredStream.write(`[${timestamp}] ${username}: ${message}\n`); // Write filtered log with timestamp
+            const filteredMessage = `[${timestamp}] ${username}: ${message}\n`;
+            filteredStream.write(filteredMessage); // Write filtered log with timestamp
+            io.emit('filtered', { bot: botUsername, username, message });
           }
         });
 
         console.log(chalk.green(`[${botUsername}] is logging`));
+        io.emit('status', `[${botUsername}] is logging`);
       }
 
       // Listen for commands from trusted users in chat
@@ -223,20 +334,26 @@ const runBot = async () => {
         if (message.startsWith('!!') && trustedUsers.includes(username)) {
           const command = message.slice(2).trim();
           handleCommand(bot, command);
+
+          // Emit the command to the web UI
+          io.emit('command-executed', { bot: botUsername, command });
         }
       });
     });
 
     bot.on('error', (err) => {
       console.error(`[${botUsername}] Error:`, err);
+      io.emit('error', `[${botUsername}] Error: ${err.message}`);
     });
 
     bot.on('end', () => {
       console.log(chalk.red(`[${botUsername}] Disconnected from the server.`));
+      io.emit('status', `[${botUsername}] Disconnected from the server.`);
     });
   }
 
-  // Handle console input for commands
+  // Optionally, handle console input for commands
+  /*
   const consoleRl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -249,68 +366,7 @@ const runBot = async () => {
       handleCommand(bot, `${command} ${args.join(' ')}`); // Pass console command to the command handler
     }
   });
-};
-
-// Function to handle commands
-const handleCommand = (bot, command) => {
-  const args = command.split(' ');
-  const cmd = args[0];
-
-  // Movement commands
-  switch (cmd) {
-    case 'f':
-      const forwardCount = parseInt(args[1], 10);
-      bot.setControlState('forward', true);
-      setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
-      break;
-
-    case 'b':
-      const backCount = parseInt(args[1], 10);
-      bot.setControlState('back', true);
-      setTimeout(() => bot.setControlState('back', false), backCount * 1000);
-      break;
-
-    case 'l':
-      const leftCount = parseInt(args[1], 10);
-      bot.setControlState('left', true);
-      setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
-      break;
-
-    case 'r':
-      const rightCount = parseInt(args[1], 10);
-      bot.setControlState('right', true);
-      setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
-      break;
-
-    case 'bot':
-      if (args[1] && args[2] && args[3]) {
-        const newBotUsername = args[1];
-        const newServerIP = args[2];
-        const newServerPort = args[3];
-
-        // Create a new bot instance with a 2-second delay
-        delay(2000).then(() => {
-          const newBot = mineflayer.createBot({
-            host: newServerIP,
-            port: newServerPort,
-            username: newBotUsername,
-          });
-
-          // Handle chat for new bot
-          newBot.on('chat', (username, message) => {
-            console.log(`[${newBotUsername}] ${username}: ${message}\n`);
-          });
-
-          console.log(`New bot created: ${newBotUsername}`);
-        });
-      } else {
-        bot.chat('Please provide a username, server IP, and port.');
-      }
-      break;
-
-    default:
-      bot.chat('Unknown command.');
-  }
+  */
 };
 
 // Start the bot
