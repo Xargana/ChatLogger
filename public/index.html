@@ -1,238 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="style.css" />
   <meta charset="UTF-8">
   <title>ChatLogger Control Panel</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #2c3e50;
-      color: #ecf0f1;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    #command-form {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    #command-input {
-      width: 300px;
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-
-    #send-button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      background-color: #3498db;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    #send-button:hover {
-      background-color: #2980b9;
-    }
-
-    #logs {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #34495e;
-      padding: 20px;
-      border-radius: 4px;
-      height: 400px;
-      overflow-y: scroll;
-    }
-
-    .log-message {
-      margin-bottom: 10px;
-    }
-
-    .status {
-      color: #f1c40f;
-    }
-
-    .error {
-      color: #e74c3c;
-    }
-
-    .chat {
-      color: #2ecc71;
-    }
-
-    .filtered {
-      color: #9b59b6;
-    }
-  </style>
 </head>
 <body>
-  <h1>ChatLogger Control Panel</h1>
+  <div id="main">
+    <div id="top">
+      <h1>ChatLogger Control Panel</h1>
+    </div>
 
-  <div id="command-form">
-    <input type="text" id="command-input" placeholder="Enter command (e.g., f 5)" />
-    <button id="send-button">Send</button>
+    <div id="main-middle">
+      <div id="logs">
+
+      </div>
+      <input type="text" id="command-input" placeholder="Enter command and press enter to send" />
+    </div>
   </div>
-
-  <div id="logs"></div>
-
-  <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
-<script>
-  // Initialize Socket.IO connection
-  const socket = io();
-
-  // DOM Elements
-  const commandInput = document.getElementById('command-input');
-  const sendButton = document.getElementById('send-button');
-  const logsDiv = document.getElementById('logs');
-
-  // Event Listeners
-  sendButton.addEventListener('click', handleSendCommand);
-  commandInput.addEventListener('keyup', handleEnterKey);
-
-  // Socket Event Listeners
-  socket.on('chat', handleChatMessage);
-  socket.on('filtered', handleFilteredMessage);
-  socket.on('status', handleStatusMessage);
-  socket.on('error', handleErrorMessage);
-  socket.on('command-executed', handleCommandExecuted);
-
-  /**
-   * Handles the send button click event to send a command.
-   */
-  function handleSendCommand() {
-    const command = commandInput.value.trim();
-    if (command) {
-      sendCommand(command);
-      logStatusCommand(`> ${command}`);
-      commandInput.value = '';
-    }
-  }
-
-  /**
-   * Handles the Enter key press in the command input field.
-   * @param {KeyboardEvent} event
-   */
-  function handleEnterKey(event) {
-    if (event.key === 'Enter') {
-      handleSendCommand();
-    }
-  }
-
-  /**
-   * Sends a command to the server via Socket.IO.
-   * @param {string} command - The command to send.
-   */
-  function sendCommand(command) {
-    socket.emit('command', command);
-  }
-
-  /**
-   * Appends a status message to the logs.
-   * @param {string} message - The status message to log.
-   */
-  function logStatusCommand(message) {
-    appendLog(message, 'status');
-  }
-
-  /**
-   * Appends a chat message to the logs.
-   * @param {Object} data - The chat data containing username and message.
-   */
-  function logChatCommand(data) {
-    const message = `${data.username}: ${data.message}`;
-    appendLog(message, 'chat');
-  }
-
-  /**
-   * Appends a command-executed message to the logs.
-   * @param {Object} data - The data containing bot and command information.
-   */
-  function logCommandExecuted(data) {
-    const message = `Command executed on [${data.bot}]: ${data.command}`;
-    appendLog(message, 'status');
-  }
-
-  /**
-   * Appends a filtered message to the logs.
-   * @param {Object} data - The filtered data containing username and message.
-   */
-  function logFilteredMessage(data) {
-    const message = `${data.username}: ${data.message}`;
-    appendLog(message, 'filtered');
-  }
-
-  /**
-   * Appends an error message to the logs.
-   * @param {string} message - The error message to log.
-   */
-  function logErrorMessage(message) {
-    appendLog(message, 'error');
-  }
-
-  /**
-   * Generic function to append messages to the logs.
-   * @param {string} message - The message to append.
-   * @param {string} type - The type/category of the message (e.g., 'chat', 'status').
-   */
-  function appendLog(message, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('log-message', type);
-    messageDiv.textContent = message;
-    logsDiv.appendChild(messageDiv);
-    logsDiv.scrollTop = logsDiv.scrollHeight;
-  }
-
-  /**
-   * Socket.IO event handler for 'chat' messages.
-   * @param {Object} data - The chat data.
-   */
-  function handleChatMessage(data) {
-    logChatCommand(data);
-  }
-
-  /**
-   * Socket.IO event handler for 'filtered' messages.
-   * @param {Object} data - The filtered data.
-   */
-  function handleFilteredMessage(data) {
-    logFilteredMessage(data);
-  }
-
-  /**
-   * Socket.IO event handler for 'status' messages.
-   * @param {string} message - The status message.
-   */
-  function handleStatusMessage(message) {
-    logStatusCommand(message);
-  }
-
-  /**
-   * Socket.IO event handler for 'error' messages.
-   * @param {string} message - The error message.
-   */
-  function handleErrorMessage(message) {
-    logErrorMessage(message);
-  }
-
-  /**
-   * Socket.IO event handler for 'command-executed' messages.
-   * @param {Object} data - The command execution data.
-   */
-  function handleCommandExecuted(data) {
-    logCommandExecuted(data);
-  }
-</script>
-  <h6>Shitty WebUI for ChatLogger</h6>
-  <h6>Made By Xargana</h6>
+  <script src="script.js"></script>
 </body>
 </html>
