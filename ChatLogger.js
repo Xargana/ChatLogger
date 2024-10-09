@@ -1,3 +1,4 @@
+//Made by Xargana and inon13
 const mineflayer = require('mineflayer');
 const fs = require('fs');
 const readline = require('readline');
@@ -6,6 +7,10 @@ const chalk = require('chalk');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const prefix = '!!';
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 // Create an interface for reading input from the console
 const rl = readline.createInterface({
@@ -101,70 +106,6 @@ const getBotSettingsFromUser = async () => {
   };
 };
 
-// Function to handle commands (same as before)
-const handleCommand = (bot, command) => {
-  const args = command.split(' ');
-  const cmd = args[0];
-
-  // Movement commands
-  switch (cmd) {
-    case 'f':
-      const forwardCount = parseInt(args[1], 10);
-      bot.setControlState('forward', true);
-      setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
-      break;
-
-    case 'b':
-      const backCount = parseInt(args[1], 10);
-      bot.setControlState('back', true);
-      setTimeout(() => bot.setControlState('back', false), backCount * 1000);
-      break;
-
-    case 'l':
-      const leftCount = parseInt(args[1], 10);
-      bot.setControlState('left', true);
-      setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
-      break;
-
-    case 'r':
-      const rightCount = parseInt(args[1], 10);
-      bot.setControlState('right', true);
-      setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
-      break;
-
-    case 'bot':
-      if (args[1] && args[2] && args[3]) {
-        const newBotUsername = args[1];
-        const newServerIP = args[2];
-        const newServerPort = args[3];
-
-        // Create a new bot instance with a 2-second delay
-        delay(2000).then(() => {
-          const newBot = mineflayer.createBot({
-            host: newServerIP,
-            port: newServerPort,
-            username: newBotUsername,
-          });
-
-          // Handle chat for new bot
-          newBot.on('chat', (username, message) => {
-            console.log(`[${newBotUsername}] ${username}: ${message}\n`);
-            io.emit('chat', { bot: newBotUsername, username, message });
-          });
-
-          console.log(`New bot created: ${newBotUsername}`);
-          io.emit('status', `New bot created: ${newBotUsername}`);
-        });
-      } else {
-        bot.chat('Please provide a username, server IP, and port.');
-      }
-      break;
-
-    default:
-      bot.chat('Unknown command.');
-  }
-};
-
 // Delay function
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -226,6 +167,146 @@ const runBot = async () => {
 
   rl.close(); // Close the input stream once inputs are gathered
 
+// Function to handle commands (same as before)
+const handleCommand = (bot, command) => {
+  const args = command.split(' ');
+  const cmd = args[0];
+
+  // Movement commands
+  switch (cmd.toLowerCase()) {
+    case 'f':
+      const forwardCount = parseInt(args[1], 10);
+      bot.setControlState('forward', true);
+      setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
+      break;
+
+    case 'b':
+      const backCount = parseInt(args[1], 10);
+      bot.setControlState('back', true);
+      setTimeout(() => bot.setControlState('back', false), backCount * 1000);
+      break;
+
+    case 'l':
+      const leftCount = parseInt(args[1], 10);
+      bot.setControlState('left', true);
+      setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
+      break;
+
+    case 'r':
+      const rightCount = parseInt(args[1], 10);
+      bot.setControlState('right', true);
+      setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
+      break;
+
+    case 'j':
+      bot.setControlState('jump', true);
+      setTimeout(() => bot.setControlState('jump', false), 1);
+      break;
+
+    case 's':
+      bot.setControlState('sneak', false);
+      bot.setControlState('jump', false);
+      bot.setControlState('sprint', false);
+      bot.setControlState('forward', false);
+      bot.setControlState('backward', false);
+      bot.setControlState('left', false);
+      bot.setControlState('right', false);
+      break;
+      
+    case 'sn':
+      const sneakTime = parseInt(args, 10);
+      bot.setControlState('sneak', true);
+      setTimeout(() => bot.setControlState('sneak', false), sneakTime * 1000);
+      break;
+
+    case 'sp':
+      const sprintTime = parseInt(args, 10);
+      bot.setControlState('sprint', true);
+      setTimeout(() => bot.setControlState('sprint', false), sprintTime * 1000);
+      break;
+
+    case 'say':
+      if (args[1]) {
+        bot.chat(args.slice(1).join(' '));
+      } else {
+        bot.chat('Please provide a message.');
+      }
+      break;
+  //allow the user to list the trusted users
+    case 'trustedusers':
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} Trusted users: ${trustedUsers.join(', ')}`);
+      });
+    break;
+    case 'tu':
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} Trusted users: ${trustedUsers.join(', ')}`);
+      });
+    break;
+    //list online players
+    case 'list':
+      const onlinePlayers = Object.keys(bot.players).join(', ');
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} Online players: ${onlinePlayers}`);  // Sends the online players list to the game chat
+      });
+      console.log(`Online players: ${onlinePlayers}`);  // Logs the online players list in the console
+    break;
+    case 'ls':
+      const oPlayers = Object.keys(bot.players).join(', ');
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} Online players: ${oPlayers}`);  // Sends the online players list to the game chat
+      });
+      console.log(`Online players: ${onlinePlayers}`);  // Logs the online players list in the console
+    break;
+    //lists the commands (help)
+    case 'help':
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} prefix: ${prefix} commands: forward(f), backwards(b), right(r), left(l), list(ls), trustedusers(tu), say, websay. non of the commands have capital restrictions (which means you can type TrUstedUsErs and it would work).`);
+      });
+    break;
+    case 'h':
+      trustedUsers.forEach(trustedUser => {
+        bot.chat(`/msg ${trustedUser} prefix: ${prefix}`);
+        bot.chat(`/msg ${trustedUser} commands: forward(f), backwards(b), right(r), left(l),`);
+        bot.chat(`/msg ${trustedUser} list(ls), trustedusers(tu), say, websay. non of the commands have capital restrictions (which means you can type TrUstedUsErs and it would work).`);
+      });
+    break;
+
+    case 'bot':
+      if (args[1] && args[2] && args[3]) {
+        const newBotUsername = args[1];
+        const newServerIP = args[2];
+        const newServerPort = args[3];
+
+        // Create a new bot instance with a 2-second delay
+        delay(2000).then(() => {
+          const newBot = mineflayer.createBot({
+            host: newServerIP,
+            port: newServerPort,
+            username: newBotUsername,
+          });
+
+          // Handle chat for new bot
+          newBot.on('chat', (username, message) => {
+            console.log(`[${newBotUsername}] ${username}: ${message}\n`);
+            io.emit('chat', { bot: newBotUsername, username, message });
+          });
+
+          console.log(`New bot created: ${newBotUsername}`);
+          io.emit('status', `New bot created: ${newBotUsername}`);
+        });
+      } else {
+        bot.chat('Please provide a username, server IP, and port.');
+      }
+      break;
+
+      default:
+        trustedUsers.forEach(trustedUser => {
+          bot.chat(`/msg ${trustedUser} Unknown command, Type ${prefix}help for a list of commands.`);
+        });
+    }
+};
+
   const {
     serverIP,
     serverPort,
@@ -251,11 +332,6 @@ const runBot = async () => {
   const filteredStream = useFiltering ? fs.createWriteStream(path.join(logDir, 'filtered.txt'), { flags: 'a' }) : null;
 
   let firstBotLogged = false; // Flag to track if the first bot has logged messages
-
-  // Initialize Express app
-  const app = express();
-  const server = http.createServer(app);
-  const io = new Server(server);
 
   // Serve static files from the 'public' directory
   app.use(express.static(path.join(__dirname, 'public')));
@@ -330,8 +406,8 @@ const runBot = async () => {
       }
 
       // Listen for commands from trusted users in chat
-      bot.on('chat', (username, message) => {
-        if (message.startsWith('!!') && trustedUsers.includes(username)) {
+      bot.on('chat', (bot, username, message) => {
+        if (message.startsWith(prefix) && trustedUsers.includes(username)) {
           const command = message.slice(2).trim();
           handleCommand(bot, command);
 
@@ -351,23 +427,9 @@ const runBot = async () => {
       io.emit('status', `[${botUsername}] Disconnected from the server.`);
     });
   }
-
-  // Optionally, handle console input for commands
-  /*
-  const consoleRl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  consoleRl.on('line', (input) => {
-    const [command, ...args] = input.trim().split(' ');
-    if (firstBotLogged) {
-      const bot = bots[0]; // Use the first bot for commands
-      handleCommand(bot, `${command} ${args.join(' ')}`); // Pass console command to the command handler
-    }
-  });
-  */
 };
+
+
 
 // Start the bot
 runBot().catch(console.error);
