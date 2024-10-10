@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="style.css" />
+  <meta charset="UTF-8">
+  <title>ChatLogger Control Panel</title>
+</head>
+<body>
+  <div id="main">
+    <div id="top">
+      <h1>ChatLogger Control Panel</h1>
+    </div>
+
+    <div id="tabs">
+      <button class="tab-button" data-tab="logs">Logs</button>
+      <button class="tab-button" data-tab="settings", id="tab-chosen">Settings</button>
+      <button class="tab-button" data-tab="scripts">Scripts</button>
+      <button class="tab-button" data-tab="bots">Bots</button>
+      <button class="tab-button" data-tab="info">Info</button>
+      <button class="tab-button" data-tab=" ">Console</button>
+    </div>
+
+    <div id="main-middle">
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
