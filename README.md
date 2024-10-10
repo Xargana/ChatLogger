@@ -29,4 +29,5 @@
 <h2 align="left">Upcoming features</h2>
 <ul>
     <li>Pathfinding</li> 
+    <li>Scripts</li>
 </ul>
