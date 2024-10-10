@@ -14,9 +14,18 @@
       <h1>ChatLogger Control Panel</h1>
     </div>
 
-    <div id="main-middle">
-      <div id="logs">
+    <div id="tabs">
+      <button class="tab-button" data-tab="logs">Logs</button>
+      <button class="tab-button" data-tab="settings">Settings</button>
+      <button class="tab-button" data-tab="scripts">Scripts</button>
+      <button class="tab-button" data-tab="bots">Bots</button>
+      <button class="tab-button" data-tab="info">Info</button>
+      <button class="tab-button" data-tab="", id="tab-chosen">Console</button>
+    </div>
 
+    <div id="main-middle">
+      <div id="logs" class="tab-content active">
+        <!-- Logs content -->
       </div>
       <input type="text" id="command-input" placeholder="Enter command and press enter to send" />
     </div>

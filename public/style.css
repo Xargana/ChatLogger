@@ -1,5 +1,4 @@
-
-body {
+  body {
     font-family: "Comfortaa", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
@@ -9,6 +8,7 @@ body {
     padding: 20px;
     background-repeat: no-repeat;
     background-size: cover;
+    background-attachment: fixed;
   }
 
   h1 {
@@ -18,11 +18,13 @@ body {
   #command-input {
     border-radius: 7px;
     padding: 10px;
-    width: 1178px;
-    color: black;
+    width: calc(100% - 20px);
+    max-width: 1178px;
+    color: white  ;
     background-color: rgba(0, 0, 0, 0.432);
     overflow-y: scroll;
     -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   #send-button {
@@ -37,14 +39,15 @@ body {
   #send-button:hover {
     background-color: #2980b9;
   }
-#main {
+
+  #main {
     margin: 0;
     padding: 20px;
     border-radius: 0;
-    overflow-y: scroll;
+    overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    background-color:       rgba(0, 0, 0, 0.308);
+    background-color: rgba(0, 0, 0, 0.308);
     background-size: cover;
     position: fixed;
     top: 0;
@@ -53,35 +56,29 @@ body {
     bottom: 0;
     width: 100%;
     height: 100%;
-}
+    box-sizing: border-box;
+  }
+
   #main-middle {
-    max-height: 1000px;
+    max-height: 80vh;
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 20px;
     border-radius: 7px;
     align-content: space-evenly;
-    overflow-y: scroll;
+    overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
     background-color: rgba(0, 0, 0, 0.63);
-  }
-
-  #credits {
-    margin: 0 auto;
-    padding: 0px;
-    border-radius: 7px;
-    overflow-y: scroll;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    align-content: center;
+    box-sizing: border-box;
   }
 
   #logs {
     border-radius: 7px;
     padding: 10px;
-    height: 500px;
-    overflow-y: scroll;
+    height: 50vh;
+    overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
     background-color: rgba(0, 0, 0, 0.452);
@@ -138,3 +135,54 @@ body {
   #github_link:hover {
     color: #259dee;
   }
+
+  #tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.63);
+    color: #ecf0f1;
+    cursor: pointer;
+    font-family: "Comfortaa", sans-serif;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  button.active {
+    background-color: #3498db;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @media (max-width: 600px) {
+    #tabs {
+      flex-direction: column;
+    }
+
+    .tab-button {
+      width: 100%;
+      margin: 5px 0;
+    }
+  }
+
+#tab-chosen {
+  background-color: rgba(0, 0, 0, 0.8);
+}
