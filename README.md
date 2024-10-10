@@ -30,5 +30,6 @@
 <ul>
     <li>Pathfinding</li> 
     <li>EasyMC</li>
+    <li>Scripts</li>
     <li>Premium accounts</li>
 </ul>
