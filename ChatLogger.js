@@ -177,25 +177,25 @@ const handleCommand = (bot, command) => {
     case 'f':
       const forwardCount = parseInt(args[1], 10);
       bot.setControlState('forward', true);
-      setTimeout(() => bot.setControlState('forward', false), forwardCount * 431);
+      setTimeout(() => bot.setControlState('forward', false), forwardCount * 230);
       break;
 
     case 'b':
       const backCount = parseInt(args[1], 10);
       bot.setControlState('back', true);
-      setTimeout(() => bot.setControlState('back', false), backCount * 431);
+      setTimeout(() => bot.setControlState('back', false), backCount * 230);
       break;
 
     case 'l':
       const leftCount = parseInt(args[1], 10);
       bot.setControlState('left', true);
-      setTimeout(() => bot.setControlState('left', false), leftCount * 431);
+      setTimeout(() => bot.setControlState('left', false), leftCount * 230);
       break;
 
     case 'r':
       const rightCount = parseInt(args[1], 10);
       bot.setControlState('right', true);
-      setTimeout(() => bot.setControlState('right', false), rightCount * 431);
+      setTimeout(() => bot.setControlState('right', false), rightCount * 230);
       break;
 
     case 'j':
