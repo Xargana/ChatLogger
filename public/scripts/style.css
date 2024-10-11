@@ -137,10 +137,6 @@
     background-color: rgba(0, 0, 0, 0.8);
   }
 
-  button.active {
-    background-color: #3498db;
-  }
-
   .tab-content {
     display: none;
   }
@@ -190,3 +186,91 @@ input::placeholder {
     width: calc(100% - 10px);
   }
 }
+
+#script {
+  display: flex;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  flex-direction: row;
+}
+
+#script-content {
+  grid-column: 1 / -1;
+}
+
+#bar_buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-direction: row;
+}
+
+#scripts_bar {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-direction: column;
+}
+
+#buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  #script {
+    grid-template-columns: 1fr;
+  }
+
+  #buttons {
+    flex-direction: column;
+  }
+}
+
+#script-new {
+  max-height: 40px;
+}
+#script-import {
+  max-height: 40px;
+}
+
+#scripts {
+  justify-items: right;
+  display: grid;
+  align-items: right;
+  align-self: right;
+  align-content: right;
+  max-height: 40vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#scripts::-webkit-scrollbar {
+  display: none;
+}
+
+#selectedScript {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+  #script-import-btn {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.63);
+    color: #ecf0f1;
+    cursor: pointer;
+    font-family: "Comfortaa", sans-serif;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  #script-import-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  #script-import {
+    display: none;
+  }

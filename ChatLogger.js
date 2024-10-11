@@ -48,6 +48,12 @@
     fs.writeFileSync(filePath, data.code, 'utf8');
   };
   
+const renameScriptFile = (data) => {
+  const oldPath = path.join(__dirname, 'scripts', data.oldName);
+  const newPath = path.join(__dirname, 'scripts', data.newName);
+  fs.renameSync(oldPath, newPath);
+}
+
   // Example usage:
   console.log('List of script files:', getScriptFiles());
   
@@ -292,8 +298,7 @@
       break;    
 
       case 'br':
-        const targetBlock = bot.blockAtCursor(7);
-        bot.dig(targetBlock);
+        bot.dig(bot.blockAtCursor(7));
       break;
 
       case 'f':
@@ -306,7 +311,7 @@
         else {
           const forwardCount = parseInt(args[1], 10);
           bot.setControlState('forward', true);
-          setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
+          setTimeout(() => bot.setControlState('forward', false), forwardCount * 50);
         }
         break;
 
@@ -320,7 +325,7 @@
         else {
           const backCount = parseInt(args[1], 10);
           bot.setControlState('back', true);
-          setTimeout(() => bot.setControlState('back', false), backCount * 1000);
+          setTimeout(() => bot.setControlState('back', false), backCount * 50);
         }
         break;
 
@@ -334,7 +339,7 @@
         else {
           const leftCount = parseInt(args[1], 10);
           bot.setControlState('left', true);
-          setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
+          setTimeout(() => bot.setControlState('left', false), leftCount * 50);
         }
         break;
 
@@ -348,7 +353,7 @@
         else {
           const rightCount = parseInt(args[1], 10);
           bot.setControlState('right', true);
-          setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
+          setTimeout(() => bot.setControlState('right', false), rightCount * 50);
         }
         break;
 
@@ -368,7 +373,7 @@
         else {
           const jumpCount = parseInt(args[1], 10);
           bot.setControlState('jump', true);
-          setTimeout(() => bot.setControlState('jump', false), jumpCount * 1000);
+          setTimeout(() => bot.setControlState('jump', false), jumpCount * 50);
         }
         break;
 
@@ -392,7 +397,7 @@
         else {
           const sneakCount = parseInt(args[1], 10);
           bot.setControlState('sneak', true);
-          setTimeout(() => bot.setControlState('sneak', false), sneakCount * 1000);
+          setTimeout(() => bot.setControlState('sneak', false), sneakCount * 50);
         }
         break;
 
@@ -406,7 +411,7 @@
         else {
           const sprintCount = parseInt(args[1], 10);
           bot.setControlState('sprint', true);
-          setTimeout(() => bot.setControlState('sprint', false), sprintCount * 1000);
+          setTimeout(() => bot.setControlState('sprint', false), sprintCount * 50);
         }
         break;
 
@@ -420,7 +425,7 @@
           else {
             const forwardCount = parseInt(args[1], 10);
             bot.setControlState('forward', true);
-            setTimeout(() => bot.setControlState('forward', false), forwardCount * 1000);
+            setTimeout(() => bot.setControlState('forward', false), forwardCount * 50);
           }
           break;
     
@@ -434,7 +439,7 @@
           else {
             const backCount = parseInt(args[1], 10);
             bot.setControlState('back', true);
-            setTimeout(() => bot.setControlState('back', false), backCount * 1000);
+            setTimeout(() => bot.setControlState('back', false), backCount * 50);
           }
           break;
     
@@ -448,7 +453,7 @@
           else {
             const leftCount = parseInt(args[1], 10);
             bot.setControlState('left', true);
-            setTimeout(() => bot.setControlState('left', false), leftCount * 1000);
+            setTimeout(() => bot.setControlState('left', false), leftCount * 50);
           }
           break;
     
@@ -462,7 +467,7 @@
           else {
             const rightCount = parseInt(args[1], 10);
             bot.setControlState('right', true);
-            setTimeout(() => bot.setControlState('right', false), rightCount * 1000);
+            setTimeout(() => bot.setControlState('right', false), rightCount * 50);
           }
           break;
     
@@ -482,7 +487,7 @@
           else {
             const jumpCount = parseInt(args[1], 10);
             bot.setControlState('jump', true);
-            setTimeout(() => bot.setControlState('jump', false), jumpCount * 1000);
+            setTimeout(() => bot.setControlState('jump', false), jumpCount * 50);
           }
           break;
     
@@ -506,7 +511,7 @@
           else {
             const sneakCount = parseInt(args[1], 10);
             bot.setControlState('sneak', true);
-            setTimeout(() => bot.setControlState('sneak', false), sneakCount * 1000);
+            setTimeout(() => bot.setControlState('sneak', false), sneakCount * 50);
           }
           break;
     
@@ -520,7 +525,7 @@
           else {
             const sprintCount = parseInt(args[1], 10);
             bot.setControlState('sprint', true);
-            setTimeout(() => bot.setControlState('sprint', false), sprintCount * 1000);
+            setTimeout(() => bot.setControlState('sprint', false), sprintCount * 50);
           }
           break;
 
@@ -672,6 +677,10 @@
         createScriptFile(data)
       });
 
+      socket.on('script.rename', (data) => {
+        renameScriptFile(data)
+      });
+
       socket.on('script.edit', (data) => {
         editScriptFile(data)
       });
@@ -682,10 +691,13 @@
 
       socket.on('script.read', (data) => {
         const scriptContent = getScriptContent(data)
-        socket.emit('script.', scriptContent)
+        socket.emit('script.send', scriptContent)
       });
 
       io.emit('script.list', getScriptFiles());
+      socket.on('script.get_list', () => {
+        socket.emit('script.list', getScriptFiles());
+      });
 
       socket.on('disconnect', () => {
         console.log('A user disconnected');

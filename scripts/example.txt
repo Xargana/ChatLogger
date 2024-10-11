@@ -1,0 +1,11 @@
+# Example Script for Mineflayer Bot
+
+# `delay` does delay in ticks untill the next command
+
+say hi
+
+delay 20
+
+say this message was delayed by 20 ticks (a second)
+
+f 20

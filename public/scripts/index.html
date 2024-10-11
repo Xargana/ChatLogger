@@ -24,14 +24,24 @@
     </div>
 
     <div id="main-middle">
-      <textarea id="script-content" rows="10" cols="50" placeholder="Enter your script here" style="white-space: pre-wrap;"></textarea>
-      <div id="buttons">
-        <button id="script.save">Save</button>
-        <button id="script.delete">Delete</button>
-        <button id="script.run">Run</button>
-        <input id="script.name"></input>
+      <div id="script">
+        <textarea id="script-content" rows="10" cols="50" placeholder="Enter your script here" style="white-space: pre-wrap;"></textarea>
+        <div id="scripts_bar">
+          <div id="bar_buttons">
+            <button id="script-new", onclick="createScriptFromWeb()">New</button>
+            <button id="script-import-btn">Import</button>
+            <input type="file" accept=".txt" id="script-import" style="display: none;">
+            <button id="script-refrash" onclick="getList()">Refrash</button>
+          </div>
+          <div id="scripts">
+          </div>
+        </div>
       </div>
-      <div id="scripts">        
+      <div id="buttons">
+        <button id="script-save" onclick="editScriptFromWeb()">Save</button>
+        <button id="script-delete" onclick="deleteScriptFromWeb()">Delete</button>
+        <button id="script-run" onclick="runScriptFromWeb()">Run</button>
+        <input id="script-name"></input>
       </div>
     </div>
   </div>
