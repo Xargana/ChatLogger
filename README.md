@@ -31,4 +31,5 @@
     <li>Pathfinding</li> 
     <li>EasyMC</li>
     <li>Premium accounts</li>
+    <li>PVP - PVE</li>
 </ul>
