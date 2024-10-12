@@ -75,7 +75,7 @@ getList();
         list.forEach(scriptName => {
           const button = document.createElement('button');
           button.className = 'script';
-          button.textContent = scriptName;
+          button.textContent = scriptName.replace('.cls', '');
           button.setAttribute('onclick', `readScript('${scriptName}')`);
           scriptsDiv.appendChild(button);
         });
@@ -99,7 +99,7 @@ getList();
       function editScriptFromWeb() {
         editScript({
           oldName: selectedScript,
-          newName: scriptName.value,
+          newName: `${scriptName.value}.cls`,
           code: scriptTA.value
         });
       }
@@ -120,7 +120,7 @@ getList();
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Delete' && event.target.classList.contains('script')) {
     event.preventDefault();
-    const scriptName = event.target.textContent;
+    const scriptName = event.target.textContent + '.cls';
     deleteScript(scriptName);
   }
 });
@@ -129,7 +129,7 @@ function generateUniqueName(baseName, existingNames) {
   let newName = baseName;
   let counter = 1;
   while (existingNames.includes(newName)) {
-    newName = `${baseName.replace('.txt', `(${counter}).txt`)}`;
+    newName = `${baseName.replace('.cls', `(${counter}).cls`)}`;
     counter++;
   }
   return newName;
@@ -139,7 +139,7 @@ function generateUniqueName(baseName, existingNames) {
 
           socket.emit('script.get_list');
           socket.once('script.list', (list) => {
-            const uniqueName = generateUniqueName('new_script.txt', list);
+            const uniqueName = generateUniqueName('new_script.cls', list);
             createScript(data={name: uniqueName, code: '# Write your script here!'});
           });
     }
@@ -227,7 +227,7 @@ document.addEventListener('keydown', function(event) {
       // Create new listener
       scriptSendListener = (scriptContent) => {
         scriptTA.value = scriptContent; // Use .value instead of .innerHTML for textarea
-        scriptName.value = data;
+        scriptName.value = data.replace('.cls', '');
         selectedScript = data;
         const scriptButtons = document.querySelectorAll('.script');
       scriptButtons.forEach(button => {
@@ -247,7 +247,7 @@ document.addEventListener('keydown', function(event) {
 
     }
     function runScript(data) {
-      sendCommand(`runscript ${data}`);
+      sendCommand(`runscript ${data.replace('.cls', '')}`);
     }
 
     function resetScript() {

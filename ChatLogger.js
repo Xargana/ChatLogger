@@ -57,11 +57,6 @@ const renameScriptFile = (data) => {
   // Example usage:
   console.log('List of script files:', getScriptFiles());
   
-  // Uncomment these lines to test the functions:
-  // editScriptFile('example.js', 'console.log("Hello, World!");');
-  // deleteScriptFile('oldscript.js');
-  // createScriptFile('newscript.js', 'console.log("New script");');
-  
 
   // Helper function to ask questions
   const askQuestion = (query) => {
@@ -107,6 +102,7 @@ const renameScriptFile = (data) => {
       password = await askQuestion('Enter password: ');
     }
 
+    
     const botCount = parseInt(await askQuestion('Enter number of bots: '), 10);
     const useRepetitiveNamesInput = await askQuestion('Use repetitive names? (y/n): ');
 
@@ -169,6 +165,7 @@ const renameScriptFile = (data) => {
       const configPath = path.join(__dirname, 'configs', configFileName);
       if (fs.existsSync(configPath)) {
         config = readConfigFile(configPath);
+        console.log(config)
 
         // Parse config data properly and set defaults
         const serverIP = config.serverIP || 'localhost'; // Default to 'localhost' if not specified
@@ -192,7 +189,7 @@ const renameScriptFile = (data) => {
           prefix: config.prefix || '!!',
           serverIP,
           serverPort,
-          version,
+          version: config.version || undefined,
           botCount,
           usernames,
           useLogin,
@@ -236,19 +233,21 @@ const renameScriptFile = (data) => {
 
       case 'runscript': 
       // Check if script filename is provided
-      if (args.length < 2) {
-        bot.chat('Please provide a script filename.');
+      if (args.length < 1) {
+        trustedUsers.forEach(trustedUser => {
+          bot.chat(`${trustedUser}: Please provide a valid script name.`);
+        })
         console.log('No script filename provided for runscript command.');
         break;
       }
     
-      const scriptFileName = args[1];
+      const scriptFileName = `${args[1]}.cls`;
       const scriptPath = path.join(__dirname, 'scripts', scriptFileName);
     
       // Check if the script file exists
       if (!fs.existsSync(scriptPath)) {
-        bot.chat(`Script file "${scriptFileName}" not found.`);
-        console.log(`Script file "${scriptFileName}" not found in /scripts folder.`);
+        bot.chat(`Script file "${scriptFileName.replace('.cls', '')}" not found.`);
+        console.log(`Script file "${scriptFileName.replace('.cls','')}" not found in /scripts folder.`);
         break;
       }
     
@@ -622,7 +621,7 @@ const renameScriptFile = (data) => {
       }
   };
 
-    const {
+const {
       prefix,
       serverIP,
       serverPort,
@@ -632,7 +631,7 @@ const renameScriptFile = (data) => {
       useFiltering,
       whitelistedWords,
       trustedUsers,
-    } = config;
+} = config;
 
     io.emit('config', config);
 
@@ -709,23 +708,22 @@ const renameScriptFile = (data) => {
     server.listen(PORT, () => {
       console.log(`Web UI server is running at http://localhost:${PORT}`);
     });
-
     for (const botUsername of usernames) {
       await delay(5000); // 5-second delay before each bot login attempt
-
       const bot = mineflayer.createBot({
         host: serverIP,
         port: serverPort,
         username: botUsername,
         password: useLogin ? password : undefined,
-        version: version || undefined, // Add version parameter
+        version: version,
       });
-
       bots.push(bot);
 
+     
 
       io.emit('config', config);
       // Handle successful login
+
       bot.on('spawn', () => {
         if (!firstBotLogged) {
           firstBotLogged = true; // Set the flag to true when the first bot spawns
@@ -790,8 +788,13 @@ const renameScriptFile = (data) => {
         console.log(chalk.red(`[${botUsername}] Disconnected from the server.`));
         io.emit('status', `[${botUsername}] Disconnected from the server.`);
       });
-    }
-  };
+
+      bot.on('kicked', (reason) => {
+        console.log(chalk.red(`[${botUsername}] Kicked from the server for a reason: ${reason.value}`));
+        io.emit('status', `[${botUsername}] Kicked from the server for a reason: ${reason.value}`);
+      });
+      }
+    };
 
   // Start the bot
   runBot().catch(console.error);

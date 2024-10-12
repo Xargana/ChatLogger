@@ -10,17 +10,14 @@
 </head>
 <body>
   <div id="main">
-    <div id="top">
-      <h1>ChatLogger Control Panel</h1>
-    </div>
-
     <div id="tabs">
+      <h3>ChatLogger</h3>
+      <button class="tab-button" data-tab="">Console</button>
       <button class="tab-button" data-tab="logs">Logs</button>
       <button class="tab-button" data-tab="settings">Settings</button>
       <button class="tab-button" data-tab="scripts", id="tab-chosen">Scripts</button>
       <button class="tab-button" data-tab="bots">Bots</button>
       <button class="tab-button" data-tab="info">Info</button>
-      <button class="tab-button" data-tab=" ">Console</button>
     </div>
 
     <div id="main-middle">
@@ -30,7 +27,7 @@
           <div id="bar_buttons">
             <button id="script-new", onclick="createScriptFromWeb()">New</button>
             <button id="script-import-btn">Import</button>
-            <input type="file" accept=".txt" id="script-import" style="display: none;">
+            <input type="file" accept=".cls" id="script-import" style="display: none;">
             <button id="script-refrash" onclick="getList()">Refrash</button>
           </div>
           <div id="scripts">

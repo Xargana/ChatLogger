@@ -11,8 +11,11 @@
     background-attachment: fixed;
   }
 
-  h1 {
-    text-align: center;
+  h3 {
+    text-align: left;
+    margin-top: 17px;
+    margin-right: 10px;
+    font-size: 20px;
   }
 
   #command-input {
@@ -60,10 +63,10 @@
   }
 
   #main-middle {
-    max-height: 80vh;
+    max-height: 700px;
     max-width: 1200px;
     width: 100%;
-    margin: 0 auto;
+    margin: 70px auto 0;
     padding: 20px;
     border-radius: 7px;
     align-content: space-evenly;
@@ -118,6 +121,14 @@
     flex-wrap: wrap;
     justify-content: center;
     margin-bottom: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.63);
   }
 
   button {
@@ -125,7 +136,7 @@
     margin: 5px;
     border: none;
     border-radius: 7px;
-    background-color: rgba(0, 0, 0, 0.63);
+    background-color: rgba(0, 0, 0, 0.377);
     color: #ecf0f1;
     cursor: pointer;
     font-family: "Comfortaa", sans-serif;
@@ -165,7 +176,7 @@ input {
   margin: 5px;
   border: none;
   border-radius: 7px;
-  background-color: rgba(0, 0, 0, 0.63);
+  background-color: rgba(0, 0, 0, 0.377);
   color: #ecf0f1;
   font-family: "Comfortaa", sans-serif;
   font-size: 14px;
@@ -259,7 +270,7 @@ input::placeholder {
     margin: 5px;
     border: none;
     border-radius: 7px;
-    background-color: rgba(0, 0, 0, 0.63);
+    background-color: rgba(0, 0, 0, 0.377);
     color: #ecf0f1;
     cursor: pointer;
     font-family: "Comfortaa", sans-serif;
