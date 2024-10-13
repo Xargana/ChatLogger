@@ -11,6 +11,7 @@
   const server = http.createServer(app);
   const io = new Server(server);
   const vec3 = require('vec3');
+  const reset = false;
 
   // Create an interface for reading input from the console
   const rl = readline.createInterface({
@@ -24,7 +25,58 @@
     const scriptsPath = path.join(__dirname, 'scripts');
     return fs.readdirSync(scriptsPath);
   };
+
+  const getConfigFiles = () => {
+    const configsPath = path.join(__dirname, 'configs');
+    return fs.readdirSync(configsPath);
+  };
+
+  const getConfigContent = (fileName) => {
+    const filePath = path.join(__dirname, 'configs', fileName);
+    return fs.readFileSync(filePath, 'utf8');
+  };
   
+  // Function to edit a file in the /configs/ directory
+  const editConfigFile = (data) => {
+    const filePath = path.join(__dirname, 'configs', data.name);
+  
+    // Check if data.code is already an object
+    const jsonData = typeof data.code === 'string' ? JSON.parse(data.code) : data.code;
+  
+    const txtContent = Object.entries(jsonData)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+  
+    fs.writeFileSync(filePath, txtContent, 'utf8');
+  };
+  
+  
+  // Function to delete a file from the /configs/ directory
+  const deleteConfigFile = (fileName) => {
+    const filePath = path.join(__dirname, 'configs', fileName);
+    fs.unlinkSync(filePath);
+  };
+  
+  // Function to create a new file in the /configs/ directory
+  const createConfigFile = (data) => {
+    const filePath = path.join(__dirname, 'configs', data.name);
+
+    // Check if data.code is already an object
+    const jsonData = typeof data.code === 'string' ? JSON.parse(data.code) : data.code;
+
+    const txtContent = Object.entries(jsonData)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+
+    fs.writeFileSync(filePath, txtContent, 'utf8');
+  };
+  
+const renameConfigFile = (data) => {
+  const oldPath = path.join(__dirname, 'configs', data.oldName);
+  const newPath = path.join(__dirname, 'configs', data.newName);
+  fs.renameSync(oldPath, newPath);
+}
+
   const getScriptContent = (fileName) => {
     const filePath = path.join(__dirname, 'scripts', fileName);
     return fs.readFileSync(filePath, 'utf8');
@@ -87,6 +139,10 @@ const renameScriptFile = (data) => {
 
   // Function to get bot settings from user input
   const getBotSettingsFromUser = async () => {
+    if (reset == true) {
+      return config;
+    }
+    else {
     const prefix = (await askQuestion('Enter a prefix for commands ("!!" if left empty): ') || '!!');
     const serverIP = await askQuestion('Enter server IP: ');
     const serverPort = (await askQuestion('Enter server port (25565 if left empty): ')) || '25565';
@@ -148,6 +204,7 @@ const renameScriptFile = (data) => {
       prefix,
     };
   };
+  };
   // Delay function
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -162,9 +219,10 @@ const renameScriptFile = (data) => {
     let usernames = []; // Initialize usernames array
 
     if (configFileName) {
-      const configPath = path.join(__dirname, 'configs', configFileName);
+      const configPath = path.join(__dirname, 'configs', `${configFileName}.clc`);
       if (fs.existsSync(configPath)) {
         config = readConfigFile(configPath);
+        io.emit('config.selected', configPath)
         console.log(config)
 
         // Parse config data properly and set defaults
@@ -199,7 +257,7 @@ const renameScriptFile = (data) => {
         };
         io.emit('config', config);
       } else {
-        console.log(chalk.red(`Config file "${configFileName}" not found in /configs folder.`));
+        console.log(chalk.red(`Config file "${configFileName.replace('.clc', '')}" not found in /configs folder.`));
         return;
       }
     } else {
@@ -295,6 +353,7 @@ const renameScriptFile = (data) => {
         }, accumulatedDelay);
       }
       break;    
+
 
       case 'br':
         bot.dig(bot.blockAtCursor(7));
@@ -672,6 +731,38 @@ const {
         }
       });
 
+      socket.on('config.set', (data) => {
+        config = data;
+        io.emit('config', config);
+        console.log(config)
+      });
+
+      socket.on('config.new', (data) => {
+        createConfigFile(data)
+      });
+
+      socket.on('config.rename', (data) => {
+        renameConfigFile(data)
+      });
+
+      socket.on('config.edit', (data) => {
+        editConfigFile(data)
+      });
+
+      socket.on('config.delete', (data) => {
+        deleteConfigFile(data)
+      });
+
+      socket.on('config.read', (data) => {
+        const configContent = readConfigFile(data)
+        socket.emit('config.send', configContent)
+      });
+
+      io.emit('config.list', getConfigFiles());
+      socket.on('config.get_list', () => {
+        socket.emit('config.list', getConfigFiles());
+      });
+
       socket.on('script.new', (data) => {
         createScriptFile(data)
       });
@@ -752,6 +843,7 @@ const {
 
         //actually fixed it now
         // Listen for commands from trusted users in chat
+
         bot.on('chat', (username, message) => {
           if (message.startsWith(prefix) && trustedUsers.includes(username)) {
             const command = message.slice(prefix.length).trim();
@@ -798,3 +890,11 @@ const {
 
   // Start the bot
   runBot().catch(console.error);
+io.on('config.set', (configData) => {
+  bots.forEach(bot => bot.quit());
+  bots = [];
+  reset = true;
+  config = configData;
+  
+  runBot().catch(console.error);
+  })
