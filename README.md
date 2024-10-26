@@ -29,7 +29,6 @@
 <h2 align="left">Upcoming features</h2>
 <ul>
     <li>Pathfinding</li> 
-    <li>EasyMC</li>
     <li>Premium accounts</li>
     <li>PVP - PVE</li>
 </ul>
