@@ -1,0 +1,36 @@
+body {
+    font-family: "Comfortaa", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    background-color: #000606;
+    color: #ecf0f1;
+    margin: 0;
+    padding: 20px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+  
+  a:link {
+    color: #ffffff;
+    background-color: transparent;
+    text-decoration: none;
+  }
+  
+  a:visited {
+    color: #ffffff;
+    background-color: transparent;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    color: #ffffff;
+    background-color: transparent;
+    text-decoration: non;
+  }
+  
+  a:active {
+    color: #ffffff;
+    background-color: transparent;
+    text-decoration: underline;
+  }

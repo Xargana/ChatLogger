@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The official website for Xargana Development">
+  <link rel="icon" type="image/x-icon" href="media/favicon.png">  
+  <title>ChatLogger</title>
+</head>
+<body>
+  <h1>ChatLogger Manager</h1>
+  <form id="startForm">
+    <h3>Start a Bot</h3>
+    <input type="text" id="serverIP" placeholder="Server IP" required />
+    <input type="number" id="serverPort" placeholder="Port (default: 25565)" />
+    <input type="text" id="username" placeholder="Username (optional)" />
+    <button type="submit">Start Bot</button>
+  </form>
+
+  <form id="stopForm">
+    <h3>Stop a Bot</h3>
+    <input type="text" id="stopServerIP" placeholder="Server IP" required />
+    <button type="submit">Stop Bot</button>
+  </form>
+  <script type="text/javascript" src="script.js"></script>
+</body>

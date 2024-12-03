@@ -29,7 +29,7 @@ function runCommand(command, description) {
 
         // Run main.js in the same console
         console.log("Starting server...");
-        require("./main.js"); // Load and execute main.js in the same process
+        require("./manager.js"); // Load and execute main.js in the same process
     } catch (err) {
         console.error("An error occurred. Exiting...", err);
     }
