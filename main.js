@@ -1,4 +1,5 @@
   //Made by Xargana and inon13
+  //no i wont make this in multiple files
   const fs = require('fs');
   const mineflayer = require('mineflayer');
   const readline = require('readline');
@@ -710,7 +711,13 @@ const {
     let firstBotLogged = false; // Flag to track if the first bot has logged messages
 
     // Serve static files from the 'public' directory
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.static(path.join(__dirname, 'public'), {
+      setHeaders: (res, path) => {
+          if (path.endsWith('.css')) {
+              res.setHeader('Content-Type', 'text/css');
+          }
+      }
+  }));
 
     // Socket.io connection handling
     io.on('connection', (socket) => {
@@ -799,6 +806,16 @@ const {
     server.listen(PORT, () => {
       console.log(`Web UI server is running at http://localhost:${PORT}`);
     });
+    const { exec } = require("child_process");
+
+    // Launch Chrome
+    console.log("Launching Chrome...");
+    const url = "http://localhost:6004";
+    exec(`start chrome ${url}`, (error) => {
+      if (error) {
+        console.error(`Error launching Chrome: ${error.message}`);
+      }
+    });
     for (const botUsername of usernames) {
       await delay(5000); // 5-second delay before each bot login attempt
       const bot = mineflayer.createBot({
@@ -809,18 +826,7 @@ const {
         version: version,
       });
       
-      const { exec } = require("child_process");
-
-      // Launch Chrome
-      console.log("Launching Chrome...");
-      const url = "http://localhost:6004";
-      exec(`start chrome ${url}`, (error) => {
-        if (error) {
-          console.error(`Error launching Chrome: ${error.message}`);
-        }
-      });
-
-
+      //push the bot (not to the repo duh)
       bots.push(bot);
 
      
