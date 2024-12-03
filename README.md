@@ -26,9 +26,7 @@
     <li>Socket.io</li>
 </ul>
 
-<h2 align="left">Upcoming features</h2>
-<ul>
-    <li>Pathfinding</li> 
-    <li>Premium accounts</li>
-    <li>PVP - PVE</li>
-</ul>
+
+ This project will be implemented on [equalizer](https://github.com/equalizer-development/equalizer) 
+
+
