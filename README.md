@@ -1,6 +1,6 @@
-<h1 align="center">ChatLogger</h1>
-<p align="center">A Minecraft utility bot for cracked servers</p>
-<div align="center">
+<h1 allign="center">ChatLogger</h1>
+<p allign="center">A Minecraft utility bot for cracked servers</p>
+<div allign="center">
     <img src="https://img.shields.io/github/last-commit/Xargana/ChatLogger" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/commit-activity/w/Xargana/CHatLogger" alt="GitHub commit activity"/>
     <img src="https://img.shields.io/github/contributors/Xargana/ChatLogger" alt="GitHub contributors"/>
@@ -9,13 +9,13 @@
     <a href="https://discord.gg/dajdVRhU5Q"><img src="https://img.shields.io/discord/1293261763902570667?logo=discord" alt="Discord"/></a>
 </div>
 
-<h2 align="left">Installation</h2>
+<h2 allign="left">Installation</h2>
  <ul>
     <li>Download the zip file from the latest release</li> 
     <li>Unzip the zip file and run start.bat</li>
 </ul>
 
-<h2 align="left">Dependencies</h2>
+<h2 allign="left">Dependencies</h2>
 <ul>
     <li>mineflayer</li>
     <li>fs</li>
@@ -26,7 +26,7 @@
     <li>Socket.io</li>
 </ul>
 
-<h2 align="left">Upcoming features</h2>
+<h2 allign="left">Upcoming features</h2>
 <ul>
     <li>Pathfinding</li> 
     <li>Premium accounts</li>
