@@ -1,5 +1,6 @@
-  //Made by Xargana and inon13
-  //no i wont make this in multiple files
+  //  Made by Xargana and inon13
+
+  
   const fs = require('fs');
   const mineflayer = require('mineflayer');
   const readline = require('readline');
@@ -917,3 +918,7 @@ io.on('config.set', (configData) => {
   
   runBot().catch(console.error);
   })
+
+
+  // note to self: stop using chatgpt
+  // this shit actually sucks
