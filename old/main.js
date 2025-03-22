@@ -631,19 +631,19 @@ const renameScriptFile = (data) => {
         trustedUsers.forEach(trustedUser => {
           bot.chat(`/msg ${trustedUser} Online players: ${oPlayers}`);  // Sends the online players list to the game chat
         });
-        console.log(`Online players: ${onlinePlayers}`);  // Logs the online players list in the console
+        console.log(`Online players: ${oPlayers}`);  // Logs the online players list in the console
       break;
       //lists the commands (help)
       case 'help':
         trustedUsers.forEach(trustedUser => {
-          bot.chat(`/msg ${trustedUser} prefix: ${prefix} commands: forward(f), backwards(b), right(r), left(l), list(ls), trustedusers(tu), say, websay. non of the commands have capital restrictions (which means you can type TrUstedUsErs and it would work).`);
+          bot.chat(`/msg ${trustedUser} prefix: ${prefix} commands: forwards(f), backwards(b), right(r), left(l), list(ls), trustedusers(tu), say, websay. non of the commands have capital restrictions (which means you can type TrUstedUsErs and it would work).`);
         });
       break;
       case 'h':
         trustedUsers.forEach(trustedUser => {
           bot.chat(`/msg ${trustedUser} prefix: ${prefix}`);
           bot.chat(`/msg ${trustedUser} commands: forward(f), backwards(b), right(r), left(l),`);
-          bot.chat(`/msg ${trustedUser} list(ls), trustedusers(tu), say, websay. non of the commands have capital restrictions (which means you can type TrUstedUsErs and it would work).`);
+          bot.chat(`/msg ${trustedUser} list(ls), trustedusers(tu), say, websay. commands are not case sensitive.`);
         });
       break;
 

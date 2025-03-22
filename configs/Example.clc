@@ -1,5 +1,5 @@
-serverIP: localhost
-serverPort: 25565
+serverIP: mc.blahaj.tr
+serverPort: 25587
 version: 1.20.4
 bot_amount: 1
 useLogin: false
@@ -7,5 +7,5 @@ username: Bot
 password: Password
 useFiltering: true
 whitelistedWords: word1, word2
-trustedUsers: player1, player2
-prefix: &&
+trustedUsers: Xargana, copemania
+prefix: !
