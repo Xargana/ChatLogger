@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatLogger - Minecraft Chat Logger</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <h1>ChatLogger</h1>
+                <p>Minecraft Chat Logger</p>
+            </div>
+            <nav>
+                <button class="tab-button active" data-tab="chat">
+                    <i class="fas fa-comments"></i> Chat
+                </button>
+                <button class="tab-button" data-tab="bots">
+                    <i class="fas fa-robot"></i> Bots
+                </button>
+                <button class="tab-button" data-tab="scripts">
+                    <i class="fas fa-code"></i> Scripts
+                </button>
+                <button class="tab-button" data-tab="config">
+                    <i class="fas fa-cog"></i> Config
+                </button>
+                <button class="tab-button" data-tab="logs">
+                    <i class="fas fa-file-alt"></i> Logs
+                </button>
+            </nav>
+            <div class="status-indicator">
+                <span class="status-dot connected"></span>
+                <span class="status-text">Connected</span>
+            </div>
+        </header>
+        
+        <main>
+            <!-- Chat Tab -->
+            <section id="chat" class="tab-content active">
+                <div class="chat-container">
+                    <div class="chat-messages">
+                        <div class="message system">
+                            <span class="timestamp">12:34:56</span>
+                            <span class="content">System: Welcome to ChatLogger!</span>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Type a command or message...">
+                        <button id="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="player-list">
+                    <h3>Online Players</h3>
+                    <div class="player-list-container">
+                        <!-- Players will be added here dynamically -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Bots Tab -->
+            <section id="bots" class="tab-content">
+                <div class="bots-controls">
+                    <button id="connect-bots" class="action-button">
+                        <i class="fas fa-plug"></i> Connect All
+                    </button>
+                    <button id="disconnect-bots" class="action-button">
+                        <i class="fas fa-power-off"></i> Disconnect All
+                    </button>
+                    <button id="add-bot" class="action-button">
+                        <i class="fas fa-plus"></i> Add Bot
+                    </button>
+                </div>
+                
+                <div class="bots-list">
+                    <!-- Bots will be listed here -->
+                </div>
+            </section>
+            
+            <!-- Scripts Tab -->
+            <section id="scripts" class="tab-content">
+                <div class="scripts-container">
+                    <div class="scripts-list">
+                        <h3>Available Scripts</h3>
+                        <div class="scripts-list-container">
+                            <!-- Scripts will be listed here -->
+                        </div>
+                        <button id="new-script" class="action-button">
+                            <i class="fas fa-plus"></i> New Script
+                        </button>
+                    </div>
+                    <div class="script-editor">
+                        <div class="editor-header">
+                            <input type="text" id="script-name" placeholder="Script name">
+                            <div class="editor-controls">
+                                <button id="save-script" class="action-button">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button id="run-script" class="action-button">
+                                    <i class="fas fa-play"></i> Run
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="script-content" placeholder="# Write your script here..."></textarea>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Config Tab -->
+            <section id="config" class="tab-content">
+                <div class="config-container">
+                    <div class="config-list">
+                        <h3>Saved Configurations</h3>
+                        <div class="config-list-container">
+                            <!-- Configs will be listed here -->
+                        </div>
+                        <button id="new-config" class="action-button">
+                            <i class="fas fa-plus"></i> New Config
+                        </button>
+                    </div>
+                    <div class="config-editor">
+                        <div class="editor-header">
+                            <input type="text" id="config-name" placeholder="Config name">
+                            <div class="editor-controls">
+                                <button id="save-config" class="action-button">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button id="load-config" class="action-button">
+                                    <i class="fas fa-upload"></i> Load
+                                </button>
+                            </div>
+                        </div>
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="server-ip">Server IP</label>
+                                <input type="text" id="server-ip" placeholder="localhost">
+                            </div>
+                            <div class="form-group">
+                                <label for="server-port">Server Port</label>
+                                <input type="text" id="server-port" placeholder="25565">
+                            </div>
+                            <div class="form-group">
+                                <label for="prefix">Command Prefix</label>
+                                <input type="text" id="prefix" placeholder="!!">
+                            </div>
+                            <div class="form-group">
+                                <label for="bot-count">Bot Count</label>
+                                <input type="number" id="bot-count" placeholder="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="username-base">Username Base</label>
+                                <input type="text" id="username-base" placeholder="Bot">
+                            </div>
+                            <div class="form-group">
+                                <label for="trusted-users">Trusted Users (comma-separated)</label>
+                                <input type="text" id="trusted-users" placeholder="user1,user2">
+                            </div>
+                            <div class="form-group checkbox">
+                                <input type="checkbox" id="use-filtering">
+                                <label for="use-filtering">Enable Chat Filtering</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="whitelisted-words">Whitelisted Words (comma-separated)</label>
+                                <input type="text" id="whitelisted-words" placeholder="word1,word2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Logs Tab -->
+            <section id="logs" class="tab-content">
+                <div class="logs-container">
+                    <div class="logs-list">
+                        <h3>Log Files</h3>
+                        <div class="logs-list-container">
+                            <!-- Log files will be listed here -->
+                        </div>
+                    </div>
+                    <div class="log-viewer">
+                        <div class="viewer-header">
+                            <span id="current-log-name">No log selected</span>
+                            <div class="viewer-controls">
+                                <button id="refresh-log" class="action-button">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                                <button id="download-log" class="action-button">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <pre id="log-content" class="log-content">Select a log file to view its contents.</pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <div class="notifications">
+            <!-- Notifications will appear here -->
+        </div>
+    </div>
+    
+    <!-- Modal for adding a new bot -->
+    <div class="modal" id="add-bot-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Bot</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-bot-username">Username</label>
+                    <input type="text" id="new-bot-username" placeholder="Bot">
+                </div>
+                <div class="form-group">
+                    <label for="new-bot-server">Server IP</label>
+                    <input type="text" id="new-bot-server" placeholder="localhost">
+                </div>
+                <div class="form-group">
+                    <label for="new-bot-port">Server Port</label>
+                    <input type="text" id="new-bot-port" placeholder="25565">
+                </div>
+                <div class="form-group">
+                    <label for="new-bot-version">Minecraft Version (optional)</label>
+                    <input type="text" id="new-bot-version" placeholder="1.19.2">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="action-button" id="add-bot-submit">Add Bot</button>
+                <button class="action-button secondary" id="add-bot-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

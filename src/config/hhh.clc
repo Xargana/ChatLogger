@@ -1,0 +1,9 @@
+prefix: !!
+serverIP: 31.220.75.60
+serverPort: 25565
+version: 
+botCount: 1
+useLogin: false
+username: 
+password: 
+useFiltering: true
