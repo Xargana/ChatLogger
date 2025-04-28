@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="style.css" />
+  <meta charset="UTF-8">
+  <title>ChatLogger Control Panel</title>
+</head>
+<body>
+  <div id="main">
+    <div id="tabs">
+      <h3>ChatLogger</h3>
+      <button class="tab-button" data-tab="">Console</button>
+      <button class="tab-button" data-tab="logs">Logs</button>
+      <button class="tab-button" data-tab="configs", id="tab-chosen">Configs</button>
+      <button class="tab-button" data-tab="scripts">Scripts</button>
+      <button class="tab-button" data-tab="bots">Bots</button>
+      <button class="tab-button" data-tab="info">Info</button>
+    </div>
+<!--wait i gotta take a big dump-->
+    <div id="main-middle">
+      <div id="config">
+        <div id="config-content">
+          <div id="serverIP">
+            Server IP: <input type="text" value="", placeholder="localhost">
+          </div>
+          <div id="serverPort">
+            Server Port: <input type="number" value="", placeholder="25565">
+          </div>
+          <div id="version">
+            Version: <input type="text" value="", placeholder="1.20.4">
+          </div>
+          <div id="bot_amount">
+            Bot Amount: <input type="number" value="", placeholder="Number">
+          </div>
+          <div id="useLogin">
+            Use Login: <input type="checkbox">
+          </div>
+          <div id="password">
+            Password: <input type="text" value="", placeholder="Password", disabled>
+          </div>
+          <div id="username">
+            Bot Username: <input type="text" value="", placeholder="Bot1">
+          </div>      
+          <div id="useFiltering">
+            Use Filtering: <input type="checkbox">
+          </div>
+          <div id="whitelistedWords">
+            Whitelisted Words: <input type="text" value="" placeholder="word1, word2..." disabled>
+          </div>
+          <div id="trustedUsers">
+            Trusted Users: <input type="text" value="", placeholder="player1, player2...">
+          </div>
+          <div id="prefix">
+            Prefix: <input type="text" value="", placeholder="!!">
+          </div>
+        </div>
+        <div id="configs_bar">
+          <div id="bar_buttons">
+            <button id="config-new", onclick="createConfigFromWeb()">New</button>
+            <button id="config-import-btn">Import</button>
+            <input type="file" accept=".clc" id="config-import" style="display: none;">
+            <button id="config-refrash" onclick="getList()">Refresh</button>
+          </div>
+          <div id="configs">
+          </div>
+        </div>
+      </div>
+      <div id="buttons">
+        <button id="config-save" onclick="editConfigFromWeb()">Save</button>
+        <button id="config-delete" onclick="deleteConfigFromWeb()">Delete</button>
+        <!-- <button id="config-set" onclick="setConfigFromWeb()">Set</button> -->
+        <input id="config-name"></input>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
