@@ -20,18 +20,42 @@ class LogService {
     return now.toTimeString().split(' ')[0]; // Returns HH:MM:SS
   }
   
-  async logChat(username, message) {
-    if (!this.chatLogPath) return;
-    
-    const timestamp = this.getCurrentTime();
-    const logMessage = `[${timestamp}] ${username}: ${message}\n`;
+  async logChatMessage(serverIP, username, message) {
+    try {
+      // Get or create the log directory for this server
+      const logDir = await this.getOrCreateLogDir(serverIP);
+      
+      // Format the log entry
+      const timestamp = new Date().toISOString();
+      const logEntry = `[${timestamp}] ${username}: ${message}\n`;
+      
+      // Path to the chat log file
+      const logPath = path.join(logDir, 'chat.log');
+      
+      // Append to the log file
+      await fs.appendFile(logPath, logEntry, 'utf8');
+      
+      return true;
+    } catch (error) {
+      console.error(`Error logging chat message: ${error.message}`);
+      return false;
+    }
+  }
+  
+  async getOrCreateLogDir(serverIP) {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dirName = `${serverIP}_${today}`;
+    const logDir = path.join(this.fileManager.paths.logs, dirName);
     
     try {
-      await fs.appendFile(this.chatLogPath, logMessage, 'utf8');
-      console.log(`[${timestamp}] ${username}: ${message}`);
+      await fs.mkdir(logDir, { recursive: true });
     } catch (error) {
-      console.error(`Error writing to chat log: ${error.message}`);
+      if (error.code !== 'EEXIST') {
+        throw error;
+      }
     }
+    
+    return logDir;
   }
   
   async logFiltered(username, message) {

@@ -10,7 +10,8 @@ class Bot extends EventEmitter {
       username: options.username || 'Bot',
       password: options.password,
       version: options.version,
-      auth: options.auth || 'mojang'
+
+      auth: options.auth || 'microsoft'  // Default is 'mojang'
     };
     
     this.trustedUsers = options.trustedUsers || [];

@@ -223,18 +223,21 @@ class BotService extends EventEmitter {
         await this.delay(5000);
         
         // Create bot options with better version handling
-        const botOptions = {
+        const botConfig = {
           host: serverIP,
           port: parseInt(serverPort, 10),
           username: botUsername,
-          password: useLogin ? password : undefined,
           version: version || false, // 'false' tells mineflayer to auto-detect the version
-          auth: 'microsoft', // Many servers now require Microsoft authentication
-          checkTimeoutInterval: 60000, // Increase timeout for slower connections
         };
         
+        // Add authentication if enabled
+        if (useLogin) {
+          botConfig.password = password;
+          botConfig.auth = 'microsoft';
+        }
+        
         this.emit('status', `Connecting ${botUsername} to ${serverIP}:${serverPort}...`);
-        const bot = mineflayer.createBot(botOptions);
+        const bot = mineflayer.createBot(botConfig);
         
         this.bots.push(bot);
         
@@ -246,7 +249,11 @@ class BotService extends EventEmitter {
             
             // Only log messages for the first bot
             bot.on('chat', (username, message) => {
-              this.logService.logChat(username, message);
+              // Don't log messages from self
+              if (username === botUsername) return;
+              
+              // Log the message
+              this.logService.logChatMessage(serverIP, username, message);
               
               // Log filtered messages if enabled
               if (config.useFiltering && 

@@ -2,12 +2,13 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class FileManager {
-  constructor() {
+  constructor(customPaths) {
     this.basePath = process.cwd();
-    this.paths = {
+    this.paths = customPaths || {
       config: path.join(this.basePath, 'config'),
       logs: path.join(this.basePath, 'logs'),
-      scripts: path.join(this.basePath, 'scripts')
+      scripts: path.join(this.basePath, 'scripts'),
+      public: path.join(this.basePath, 'public')
     };
   }
   

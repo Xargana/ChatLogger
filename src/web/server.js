@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const path = require('path');
+const fs = require('fs').promises;
 const { Server } = require('socket.io');
 const { exec } = require('child_process');
 
@@ -141,6 +142,43 @@ class WebServer {
           socket.emit('status', `Active bot set to index ${index}`);
         } else {
           socket.emit('error', 'Invalid bot index');
+        }
+      });
+      
+      // For configs
+      socket.on('config.read', async (fileName) => {
+        const configPath = path.join(this.fileManager.paths.config, fileName);
+        const content = await this.fileManager.readFile(configPath);
+        if (content) {
+          socket.emit('config.current', await this.fileManager.readConfigFile(configPath));
+        } else {
+          socket.emit('error', `Failed to read configuration: ${fileName}`);
+        }
+      });
+
+      // For logs
+      socket.on('logs.get', async () => {
+        try {
+          const logDirs = await fs.readdir(this.fileManager.paths.logs);
+          socket.emit('logs.list', logDirs);
+        } catch (error) {
+          socket.emit('error', `Failed to get log directories: ${error.message}`);
+        }
+      });
+
+      socket.on('log.read', async (logDirName) => {
+        try {
+          const logDir = path.join(this.fileManager.paths.logs, logDirName);
+          const logFilePath = path.join(logDir, 'chat.log');
+    
+          const content = await this.fileManager.readFile(logFilePath);
+          if (content) {
+            socket.emit('log.content', { name: logDirName, content });
+          } else {
+            socket.emit('error', `No log file found in ${logDirName}`);
+          }
+        } catch (error) {
+          socket.emit('error', `Failed to read log: ${error.message}`);
         }
       });
       

@@ -167,6 +167,26 @@
                                 <label for="whitelisted-words">Whitelisted Words (comma-separated)</label>
                                 <input type="text" id="whitelisted-words" placeholder="word1,word2">
                             </div>
+                            <div class="form-group">
+                                <label for="auth-type">Authentication Type</label>
+                                <select id="auth-type">
+                                    <option value="mojang">Mojang</option>
+                                    <option value="microsoft">Microsoft</option>
+                                    <option value="none">None (Cracked)</option>
+                                </select>
+                            </div>
+                            <div class="form-group checkbox">
+                                <input type="checkbox" id="use-login">
+                                <label for="use-login">Use Authentication</label>
+                            </div>
+                            <div class="form-group login-fields" style="display:none;">
+                                <label for="login-username">Microsoft Email</label>
+                                <input type="text" id="login-username" placeholder="Email for Microsoft auth">
+                            </div>
+                            <div class="form-group login-fields" style="display:none;">
+                                <label for="login-password">Password</label>
+                                <input type="password" id="login-password" placeholder="Password, leave blank for msn auth">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -209,7 +229,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Bot</h2>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">×</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">

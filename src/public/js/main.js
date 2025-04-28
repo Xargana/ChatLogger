@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
       this.setupSocketListeners();
       this.setupUIHandlers();
       this.checkConnectionStatus();
+      
+      // Request log files when initializing
+      socket.emit('logs.get');
     },
     
     setupTabNavigation: function() {
@@ -554,6 +557,16 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('trusted-users').value = (config.trustedUsers || []).join(',');
       document.getElementById('use-filtering').checked = config.useFiltering || false;
       document.getElementById('whitelisted-words').value = (config.whitelistedWords || []).join(',');
+      document.getElementById('use-login').checked = config.useLogin || false;
+      document.getElementById('auth-type').value = config.auth || 'mojang';
+      document.getElementById('login-username').value = config.loginUsername || '';
+      document.getElementById('login-password').value = config.loginPassword || '';
+      
+      // Toggle visibility of login fields
+      const loginFields = document.querySelectorAll('.login-fields');
+      loginFields.forEach(field => {
+          field.style.display = config.useLogin ? 'block' : 'none';
+      });
     },
     
     getConfigFromForm: function() {
@@ -565,7 +578,11 @@ document.addEventListener('DOMContentLoaded', function() {
         username: document.getElementById('username-base').value,
         trustedUsers: document.getElementById('trusted-users').value.split(',').map(u => u.trim()).filter(u => u),
         useFiltering: document.getElementById('use-filtering').checked,
-        whitelistedWords: document.getElementById('whitelisted-words').value.split(',').map(w => w.trim()).filter(w => w)
+        whitelistedWords: document.getElementById('whitelisted-words').value.split(',').map(w => w.trim()).filter(w => w),
+        useLogin: document.getElementById('use-login').checked,
+        auth: document.getElementById('auth-type').value,
+        loginUsername: document.getElementById('login-username').value,
+        loginPassword: document.getElementById('login-password').value
       };
     },
     
@@ -642,9 +659,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     escapeHtml: function(unsafe) {
       return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }

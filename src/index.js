@@ -7,8 +7,16 @@ const path = require('path');
 
 class Application {
   constructor() {
+    // Configure paths
+    this.PATHS = {
+      scripts: path.join(__dirname, 'scripts'),
+      config: path.join(__dirname, 'config'),  // Change to singular to match FileManager
+      logs: path.join(__dirname, 'logs'),      // Remove 'src'
+      public: path.join(__dirname, 'public')
+    };
+
     // Initialize services
-    this.fileManager = new FileManager();
+    this.fileManager = new FileManager(this.PATHS);
     this.configManager = new ConfigManager(this.fileManager);
     this.logService = new LogService(this.fileManager);
     this.botService = new BotService({
@@ -21,7 +29,7 @@ class Application {
       configManager: this.configManager,
       fileManager: this.fileManager
     });
-  }
+  }    
 
   async initialize() {
     console.log('Initializing ChatLogger...');
